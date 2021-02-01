@@ -452,6 +452,7 @@ int main()
 		obj[0].energy+=2; //накопление энергии
 		constrain(obj[0].energy, 0, 1000);
 		if (!KEY_DOWN(VK_LSHIFT))shot0_press = 0;
+
 		/*if (KEY_PUSH(0x5A) && shot == 0)
 		{
 			shot = 1;
