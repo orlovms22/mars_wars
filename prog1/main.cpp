@@ -46,6 +46,11 @@ void constrain(int16_t & a, int16_t min, int16_t max)
 	if (a > max) a = max;
 }
 
+double sq(double x)
+{
+	return x * x;
+}
+
 bool intersect(pt a, pt b, pt c, pt d) { //функция определения пересечения отрезков ab и cd
 	double v1 = (d.x - c.x)*(a.y - c.y) - (d.y - c.y)*(a.x - c.x);
 	double v2 = (d.x - c.x)*(b.y - c.y) - (d.y - c.y)*(b.x - c.x);
@@ -623,52 +628,48 @@ int main()
 
 			obj[i].v = 0;
 		}
-		for (int i = 0; i < 10; i++) //обработка движения пуль
+		for (int i = 0; i < 10; i++)
 		{
 			if ((obj[0].bullet_shot >> i) % 2)
 			{
-				obj[0].bullet[i].setPosition(obj[0].bullet_x[i], obj[0].bullet_y[i]); //установка спрайта пули в нужное положение
+				obj[0].bullet[i].setPosition(obj[0].bullet_x[i], obj[0].bullet_y[i]);
 				obj[0].bullet[i].setRotation(-obj[0].bullet_angle[i]);
-				for (int j = 0; j < bullet_v / 6; j++)
+				//obj[0].bullet_x[i] = obj[0].bullet_x[i] - bullet_v * sin(obj[0].bullet_angle[i] / 57.3);
+				//obj[0].bullet_y[i] = obj[0].bullet_y[i] - bullet_v * cos(obj[0].bullet_angle[i] / 57.3);
+				for (int k = 0; k < obj_n; k++)
 				{
-					obj[0].bullet_x[i] = obj[0].bullet_x[i] - bullet_v/6 * sin(obj[0].bullet_angle[i] / 57.3);
-					obj[0].bullet_y[i] = obj[0].bullet_y[i] - bullet_v/6 * cos(obj[0].bullet_angle[i] / 57.3);
-					for (int k = 0; k < obj_n; k++) //перебираем другие объекты
+					if (k != 0 && sq(obj[0].bullet[i].x - obj[k].x) + sq(obj[0].bullet[i].y - obj[k].y) < sq(bullet_v + obj[k].max_dist + 10))
 					{
-						if (sqrt(pow(obj[i].x - obj[k].x, 2) + pow(obj[i].y - obj[k].y, 2)) < obj[i].max_dist + obj[k].max_dist + 10) //если это не текущий объект и он не далеко
+						for (int n = 0; n < obj[k].n; n++)
 						{
-							for (int n = 0; n < obj[k].n; n++) //перебираем стороны другого объекта
+							pt a, b, c, d;
+							a.x = obj[0].bullet_x[i] - bullet_v * sin(obj[0].bullet_angle[i] / 57.3);
+							a.y = obj[0].bullet_y[i] - bullet_v * cos(obj[0].bullet_angle[i] / 57.3);
+							b.x = obj[0].bullet_x[i];
+							b.y = obj[0].bullet_y[i];
+							c.x = obj[k].x + obj[k].c[n].l * sin((obj[k].angle + obj[k].c[n].a) / 57.3);
+							c.y = obj[k].y + obj[k].c[n].l * cos((obj[k].angle + obj[k].c[n].a) / 57.3);
+							if (n < obj[k].n - 1)
 							{
-								pt a, b, c, d;
-								a.x = obj[i].x + obj[i].c[j].l * sin((obj[i].angle + obj[i].c[j].a) / 57.3); //координаты угла текущего объекта
-								a.y = obj[i].y + obj[i].c[j].l * cos((obj[i].angle + obj[i].c[j].a) / 57.3);
-								b.x = obj[i].x; //координаты центра текущего объекта
-								b.y = obj[i].y;
-								c.x = obj[k].x + obj[k].c[n].l * sin((obj[k].angle + obj[k].c[n].a) / 57.3); //координата конца стороны другого объекта
-								c.y = obj[k].y + obj[k].c[n].l * cos((obj[k].angle + obj[k].c[n].a) / 57.3);
-								if (n < obj[k].n - 1)
-								{
-									d.x = obj[k].x + obj[k].c[n + 1].l * sin((obj[k].angle + obj[k].c[n + 1].a) / 57.3); //координата конца стороны другого объекта
-									d.y = obj[k].y + obj[k].c[n + 1].l * cos((obj[k].angle + obj[k].c[n + 1].a) / 57.3);
-								}
-								else
-								{
-									d.x = obj[k].x + obj[k].c[0].l * sin((obj[k].angle + obj[k].c[0].a) / 57.3); //координата конца стороны другого объекта
-									d.y = obj[k].y + obj[k].c[0].l * cos((obj[k].angle + obj[k].c[0].a) / 57.3);
-								}
-								if (intersect(a, b, c, d)) //проверка пересечения
-								{
-										
-								}
+								d.x = obj[k].x + obj[k].c[n + 1].l * sin((obj[k].angle + obj[k].c[n + 1].a) / 57.3);
+								d.y = obj[k].y + obj[k].c[n + 1].l * cos((obj[k].angle + obj[k].c[n + 1].a) / 57.3);
 							}
+							else
+							{
+								d.x = obj[k].x + obj[k].c[0].l * sin((obj[k].angle + obj[k].c[0].a) / 57.3);
+								d.y = obj[k].y + obj[k].c[0].l * cos((obj[k].angle + obj[k].c[0].a) / 57.3);
+							}
+							if (intersect(a, b, c, d))
+							{
 
+							}
 						}
 					}
 				}
 			}
-			if (obj[0].bullet_x[i] > width + 30 || obj[0].bullet_x[i] < -30 || obj[0].bullet_y[i] < -30 || obj[0].bullet_y[i] > height + 30) //проверка выхода за границы экрана
+			if (obj[0].bullet_x[i] > width + 30 || obj[0].bullet_x[i] < -30 || obj[0].bullet_y[i] < -30 || obj[0].bullet_y[i] > height + 30)
 			{
-				obj[0].bullet_shot &= ~(1 << i); //установка в свободное состояние 
+				obj[0].bullet_shot &= ~(1 << i);
 			}
 		}
 
