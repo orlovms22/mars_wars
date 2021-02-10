@@ -2,16 +2,16 @@
 #include "windows.h"
 #include "Math.h"
 
-#define KEY_DOWN(key) (GetAsyncKeyState(key) & 0x8000) //обработка нажатий клавиш
+#define KEY_DOWN(key) (GetAsyncKeyState(key) & 0x8000) //РѕР±СЂР°Р±РѕС‚РєР° РЅР°Р¶Р°С‚РёР№ РєР»Р°РІРёС€
 #define KEY_PUSH(key) (GetAsyncKeyState(key) & 0x0001)
 
-#define v_max 3 //скорость марсохода
-#define angle_max 2 //угловая скорость марсохода
-#define bullet_v 30 //скорость пуль марсохода
+#define v_max 3 //СЃРєРѕСЂРѕСЃС‚СЊ РјР°СЂСЃРѕС…РѕРґР°
+#define angle_max 2 //СѓРіР»РѕРІР°СЏ СЃРєРѕСЂРѕСЃС‚СЊ РјР°СЂСЃРѕС…РѕРґР°
+#define bullet_v 30 //СЃРєРѕСЂРѕСЃС‚СЊ РїСѓР»СЊ РјР°СЂСЃРѕС…РѕРґР°
 
-#define obj_n 3 //количество объектов 
+#define obj_n 3 //РєРѕР»РёС‡РµСЃС‚РІРѕ РѕР±СЉРµРєС‚РѕРІ 
 
-#define width 1900 //размеры окна
+#define width 1900 //СЂР°Р·РјРµСЂС‹ РѕРєРЅР°
 #define height 1000
 
 using namespace sf;
@@ -51,7 +51,7 @@ double sq(double x)
 	return x * x;
 }
 
-bool intersect(pt a, pt b, pt c, pt d) { //функция определения пересечения отрезков ab и cd
+bool intersect(pt a, pt b, pt c, pt d) { //С„СѓРЅРєС†РёСЏ РѕРїСЂРµРґРµР»РµРЅРёСЏ РїРµСЂРµСЃРµС‡РµРЅРёСЏ РѕС‚СЂРµР·РєРѕРІ ab Рё cd
 	double v1 = (d.x - c.x)*(a.y - c.y) - (d.y - c.y)*(a.x - c.x);
 	double v2 = (d.x - c.x)*(b.y - c.y) - (d.y - c.y)*(b.x - c.x);
 	double v3 = (b.x - a.x)*(c.y - a.y) - (b.y - a.y)*(c.x - a.x);
@@ -66,11 +66,11 @@ struct vector
 	double l;
 };
 
-struct object //структура объекта на поле
+struct object //СЃС‚СЂСѓРєС‚СѓСЂР° РѕР±СЉРµРєС‚Р° РЅР° РїРѕР»Рµ
 {
 	uint8_t n;
-	vector c[10]; //углы
-	vector s[10]; //стороны
+	vector c[10]; //СѓРіР»С‹
+	vector s[10]; //СЃС‚РѕСЂРѕРЅС‹
 	bool mv;
 	Sprite sprite;
 	double x;
@@ -92,39 +92,39 @@ struct object //структура объекта на поле
 	int16_t energy;
 };
 
-object obj[obj_n]; //создание объектов
+object obj[obj_n]; //СЃРѕР·РґР°РЅРёРµ РѕР±СЉРµРєС‚РѕРІ
 
 int main()
 {
-	RenderWindow window(VideoMode(width, height), "prog1"); //создаем окно
+	RenderWindow window(VideoMode(width, height), "prog1"); //СЃРѕР·РґР°РµРј РѕРєРЅРѕ
 
-	Texture background; //открываем картинку бэкграунда
-	background.loadFromFile("C:\\С++\\infa_project\\prog1\\background.png");
+	Texture background; //РѕС‚РєСЂС‹РІР°РµРј РєР°СЂС‚РёРЅРєСѓ Р±СЌРєРіСЂР°СѓРЅРґР°
+	background.loadFromFile("C:\\РЎ++\\infa_project\\prog1\\background.png");
 	Sprite bg(background);
 
-	RectangleShape energy1; //создаем полоску энергии первого марсохода
+	RectangleShape energy1; //СЃРѕР·РґР°РµРј РїРѕР»РѕСЃРєСѓ СЌРЅРµСЂРіРёРё РїРµСЂРІРѕРіРѕ РјР°СЂСЃРѕС…РѕРґР°
 	energy1.setSize(Vector2f(200, 20));
 	energy1.setPosition(20, 20);
 	energy1.setFillColor(Color(0, 255, 0, 128));
-	RectangleShape energy1_bar; //создаем фон полоски энергии первого марсохода
+	RectangleShape energy1_bar; //СЃРѕР·РґР°РµРј С„РѕРЅ РїРѕР»РѕСЃРєРё СЌРЅРµСЂРіРёРё РїРµСЂРІРѕРіРѕ РјР°СЂСЃРѕС…РѕРґР°
 	energy1_bar.setSize(Vector2f(200, 20));
 	energy1_bar.setPosition(20, 20);
 	energy1_bar.setFillColor(Color(0, 0, 0, 128));
 
-	Texture texture1; //текстура первого марсохода
-	texture1.loadFromFile("C:\\С++\\infa_project\\prog1\\rover_new1.png");
+	Texture texture1; //С‚РµРєСЃС‚СѓСЂР° РїРµСЂРІРѕРіРѕ РјР°СЂСЃРѕС…РѕРґР°
+	texture1.loadFromFile("C:\\РЎ++\\infa_project\\prog1\\rover_new1.png");
 	obj[0].sprite.setTexture(texture1);
 	obj[0].sprite.setOrigin(25, 40);
 
-	obj[0].x = 800; //положение в пространстве
+	obj[0].x = 800; //РїРѕР»РѕР¶РµРЅРёРµ РІ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРµ
 	obj[0].y = 800;
 	obj[0].angle = 90;
 	obj[0].v = 0;
 
-	obj[0].mass = 1; //масса марсохода
-	obj[0].energy = 1000; //энергия марсохода
+	obj[0].mass = 1; //РјР°СЃСЃР° РјР°СЂСЃРѕС…РѕРґР°
+	obj[0].energy = 1000; //СЌРЅРµСЂРіРёСЏ РјР°СЂСЃРѕС…РѕРґР°
 
-	obj[0].n = 8; //задаем углы марсохода
+	obj[0].n = 8; //Р·Р°РґР°РµРј СѓРіР»С‹ РјР°СЂСЃРѕС…РѕРґР°
 	obj[0].c[0].a = -38.88;
 	obj[0].c[0].l = 40;
 	obj[0].c[1].a = 38.88;
@@ -141,9 +141,9 @@ int main()
 	obj[0].c[6].l = 34;
 	obj[0].c[7].a = -141.12;
 	obj[0].c[7].l = 40;
-	obj[0].max_dist = 40; //максимальная дистанция обработки столкновений 
+	obj[0].max_dist = 40; //РјР°РєСЃРёРјР°Р»СЊРЅР°СЏ РґРёСЃС‚Р°РЅС†РёСЏ РѕР±СЂР°Р±РѕС‚РєРё СЃС‚РѕР»РєРЅРѕРІРµРЅРёР№ 
 
-	obj[0].s[0].a = 90; //задаем стороны марсохода
+	obj[0].s[0].a = 90; //Р·Р°РґР°РµРј СЃС‚РѕСЂРѕРЅС‹ РјР°СЂСЃРѕС…РѕРґР°
 	obj[0].s[0].l = 50;
 	obj[0].s[1].a = 180;
 	obj[0].s[1].l = 62;
@@ -160,20 +160,20 @@ int main()
 	obj[0].s[7].a = 0;
 	obj[0].s[7].l = 62;
 
-	Texture texture1_1; //текстура пуль первого марсохода
-	texture1_1.loadFromFile("C:\\С++\\infa_project\\prog1\\bull.png");
+	Texture texture1_1; //С‚РµРєСЃС‚СѓСЂР° РїСѓР»СЊ РїРµСЂРІРѕРіРѕ РјР°СЂСЃРѕС…РѕРґР°
+	texture1_1.loadFromFile("C:\\РЎ++\\infa_project\\prog1\\bull.png");
 	for (int i = 0; i < 10; i++)
 	{
 		obj[0].bullet[i].setTexture(texture1_1);
 		obj[0].bullet[i].setPosition(-10, -10);
 		obj[0].bullet[i].setOrigin(3, 7);
 	}
-	obj[0].bullet_shot = 0; //биты состояния пуль 1 - летит / 0 - ожидание
-	obj[0].reg = 1; //режим стрельбы первого марсохода
-	bool shot0_press = false; //предыдущее состояние кнопки выстрела
+	obj[0].bullet_shot = 0; //Р±РёС‚С‹ СЃРѕСЃС‚РѕСЏРЅРёСЏ РїСѓР»СЊ 1 - Р»РµС‚РёС‚ / 0 - РѕР¶РёРґР°РЅРёРµ
+	obj[0].reg = 1; //СЂРµР¶РёРј СЃС‚СЂРµР»СЊР±С‹ РїРµСЂРІРѕРіРѕ РјР°СЂСЃРѕС…РѕРґР°
+	bool shot0_press = false; //РїСЂРµРґС‹РґСѓС‰РµРµ СЃРѕСЃС‚РѕСЏРЅРёРµ РєРЅРѕРїРєРё РІС‹СЃС‚СЂРµР»Р°
 
 	Texture texture2;
-	texture2.loadFromFile("C:\\С++\\infa_project\\prog1\\rover_new2.png");
+	texture2.loadFromFile("C:\\РЎ++\\infa_project\\prog1\\rover_new2.png");
 	obj[1].sprite.setTexture(texture2);
 	obj[1].sprite.setOrigin(25, 40);
 	obj[1].x = 800;
@@ -219,7 +219,7 @@ int main()
 
 
 	Texture texture3;
-	texture3.loadFromFile("C:\\С++\\infa_project\\prog1\\box.png");
+	texture3.loadFromFile("C:\\РЎ++\\infa_project\\prog1\\box.png");
 	obj[2].sprite.setTexture(texture3);
 	obj[2].sprite.setOrigin(11, 11);
 	obj[2].x = 600;
@@ -247,7 +247,7 @@ int main()
 	obj[2].s[3].l = 21;
 
 	/*Texture texture4;
-	texture4.loadFromFile("C:\\С++\\infa_project\\prog1\\base1.png");
+	texture4.loadFromFile("C:\\РЎ++\\infa_project\\prog1\\base1.png");
 	obj[3].sprite.setTexture(texture4);
 	obj[3].sprite.setOrigin(50, 50);
 	obj[3].x = 800;
@@ -351,7 +351,7 @@ int main()
 	int shot = 0;*/
 
 	/*Texture texture1;
-	texture1.loadFromFile("C:\\С++\\infa_project\\prog1\\bull.png");
+	texture1.loadFromFile("C:\\РЎ++\\infa_project\\prog1\\bull.png");
 	Sprite bull1(texture1);
 	bull1.setOrigin(2, 3);
 	float angle_b = 0;*/
@@ -369,7 +369,7 @@ int main()
 		//if (shot) bull1.move(bullet_v*sin(angle_b / 57.3), -bullet_v * cos(angle_b / 57.3));
 		//if (shot > 80) shot = 0;
 
-		Event event; //обработка закрытия окна
+		Event event; //РѕР±СЂР°Р±РѕС‚РєР° Р·Р°РєСЂС‹С‚РёСЏ РѕРєРЅР°
 		while (window.pollEvent(event))
 		{
 			if (event.type == Event::Closed)
@@ -377,8 +377,8 @@ int main()
 		}
 		if(KEY_PUSH(VK_ESCAPE)) window.close();
 		
-		if (KEY_DOWN(VK_LCONTROL)) obj[0].energy -= 4; //включение режима ускорения
-		if (KEY_DOWN(0x57)) //обработка нажатий клавиш движения
+		if (KEY_DOWN(VK_LCONTROL)) obj[0].energy -= 4; //РІРєР»СЋС‡РµРЅРёРµ СЂРµР¶РёРјР° СѓСЃРєРѕСЂРµРЅРёСЏ
+		if (KEY_DOWN(0x57)) //РѕР±СЂР°Р±РѕС‚РєР° РЅР°Р¶Р°С‚РёР№ РєР»Р°РІРёС€ РґРІРёР¶РµРЅРёСЏ
 		{
 			if (!KEY_DOWN(VK_LCONTROL) || obj[0].energy < 0) obj[0].v = -v_max;
 			else obj[0].v = -v_max * 1.5;
@@ -399,62 +399,62 @@ int main()
 			else obj[0].angle -= angle_max * 1.5;
 		}
 
-		if (KEY_DOWN(VK_LSHIFT) && shot0_press == 0) //обработка выстрела 
+		if (KEY_DOWN(VK_LSHIFT) && shot0_press == 0) //РѕР±СЂР°Р±РѕС‚РєР° РІС‹СЃС‚СЂРµР»Р° 
 		{
-			if (obj[0].reg == 1 && obj[0].energy > 300) //проверка режима и энергии | одиночный режим
+			if (obj[0].reg == 1 && obj[0].energy > 300) //РїСЂРѕРІРµСЂРєР° СЂРµР¶РёРјР° Рё СЌРЅРµСЂРіРёРё | РѕРґРёРЅРѕС‡РЅС‹Р№ СЂРµР¶РёРј
 			{
 				int i = 0;
-				while ((obj[0].bullet_shot >> i) % 2) //поиск свободной пули
+				while ((obj[0].bullet_shot >> i) % 2) //РїРѕРёСЃРє СЃРІРѕР±РѕРґРЅРѕР№ РїСѓР»Рё
 				{
 					i++;
 				}
-				obj[0].bullet_shot |= 1 << i; //устанавливаем бит полета пули
-				obj[0].bullet_angle[i] = obj[0].angle; //задаем направление и положение
+				obj[0].bullet_shot |= 1 << i; //СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј Р±РёС‚ РїРѕР»РµС‚Р° РїСѓР»Рё
+				obj[0].bullet_angle[i] = obj[0].angle; //Р·Р°РґР°РµРј РЅР°РїСЂР°РІР»РµРЅРёРµ Рё РїРѕР»РѕР¶РµРЅРёРµ
 				obj[0].bullet_x[i] = obj[0].x - 15 * sin(obj[0].angle / 57.3);
 				obj[0].bullet_y[i] = obj[0].y - 15 * cos(obj[0].angle / 57.3);
 				obj[0].energy -= 300;
 
-				obj[0].x -= 5 * sin(-obj[0].angle / 57.3); //отдача
+				obj[0].x -= 5 * sin(-obj[0].angle / 57.3); //РѕС‚РґР°С‡Р°
 				obj[0].y += 5 * cos(-obj[0].angle / 57.3);
 			}
-			if (obj[0].reg == 2 && obj[0].energy > 500) //проверка режима и энергии | режим тройного выстрела
+			if (obj[0].reg == 2 && obj[0].energy > 500) //РїСЂРѕРІРµСЂРєР° СЂРµР¶РёРјР° Рё СЌРЅРµСЂРіРёРё | СЂРµР¶РёРј С‚СЂРѕР№РЅРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°
 			{
 				int i = 0;
-				while ((obj[0].bullet_shot >> i) % 2) //поиск свободной пули
+				while ((obj[0].bullet_shot >> i) % 2) //РїРѕРёСЃРє СЃРІРѕР±РѕРґРЅРѕР№ РїСѓР»Рё
 				{
 					i++;
 				}
-				obj[0].bullet_shot |= 1 << i; //устанавливаем бит полета пули
-				obj[0].bullet_angle[i] = obj[0].angle; //задаем направление и положение
+				obj[0].bullet_shot |= 1 << i; //СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј Р±РёС‚ РїРѕР»РµС‚Р° РїСѓР»Рё
+				obj[0].bullet_angle[i] = obj[0].angle; //Р·Р°РґР°РµРј РЅР°РїСЂР°РІР»РµРЅРёРµ Рё РїРѕР»РѕР¶РµРЅРёРµ
 				obj[0].bullet_x[i] = obj[0].x - 15 * sin(obj[0].angle / 57.3);
 				obj[0].bullet_y[i] = obj[0].y - 15 * cos(obj[0].angle / 57.3);
 				i = 0;
-				while ((obj[0].bullet_shot >> i) % 2) //поиск свободной пули
+				while ((obj[0].bullet_shot >> i) % 2) //РїРѕРёСЃРє СЃРІРѕР±РѕРґРЅРѕР№ РїСѓР»Рё
 				{
 					i++;
 				}
-				obj[0].bullet_shot |= 1 << i; //устанавливаем бит полета пули
-				obj[0].bullet_angle[i] = obj[0].angle + 10; //задаем направление и положение
+				obj[0].bullet_shot |= 1 << i; //СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј Р±РёС‚ РїРѕР»РµС‚Р° РїСѓР»Рё
+				obj[0].bullet_angle[i] = obj[0].angle + 10; //Р·Р°РґР°РµРј РЅР°РїСЂР°РІР»РµРЅРёРµ Рё РїРѕР»РѕР¶РµРЅРёРµ
 				obj[0].bullet_x[i] = obj[0].x - 15 * sin(obj[0].angle / 57.3);
 				obj[0].bullet_y[i] = obj[0].y - 15 * cos(obj[0].angle / 57.3);
 				i = 0;
-				while ((obj[0].bullet_shot >> i) % 2) //поиск свободной пули
+				while ((obj[0].bullet_shot >> i) % 2) //РїРѕРёСЃРє СЃРІРѕР±РѕРґРЅРѕР№ РїСѓР»Рё
 				{
 					i++;
 				}
-				obj[0].bullet_shot |= 1 << i; //устанавливаем бит полета пули
-				obj[0].bullet_angle[i] = obj[0].angle - 10;//задаем направление и положение
+				obj[0].bullet_shot |= 1 << i; //СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј Р±РёС‚ РїРѕР»РµС‚Р° РїСѓР»Рё
+				obj[0].bullet_angle[i] = obj[0].angle - 10;//Р·Р°РґР°РµРј РЅР°РїСЂР°РІР»РµРЅРёРµ Рё РїРѕР»РѕР¶РµРЅРёРµ
 				obj[0].bullet_x[i] = obj[0].x - 15 * sin(obj[0].angle / 57.3);
 				obj[0].bullet_y[i] = obj[0].y - 15 * cos(obj[0].angle / 57.3);
 				obj[0].energy -= 500;
 
-				obj[0].x -= 8 * sin(-obj[0].angle / 57.3); //отдача
+				obj[0].x -= 8 * sin(-obj[0].angle / 57.3); //РѕС‚РґР°С‡Р°
 				obj[0].y += 8 * cos(-obj[0].angle / 57.3);
 			}
 			shot0_press = 1;
 		}
-		energy1.setSize(Vector2f(obj[0].energy/5, 20)); //установка размера полоски энергии
-		obj[0].energy+=2; //накопление энергии
+		energy1.setSize(Vector2f(obj[0].energy/5, 20)); //СѓСЃС‚Р°РЅРѕРІРєР° СЂР°Р·РјРµСЂР° РїРѕР»РѕСЃРєРё СЌРЅРµСЂРіРёРё
+		obj[0].energy+=2; //РЅР°РєРѕРїР»РµРЅРёРµ СЌРЅРµСЂРіРёРё
 		constrain(obj[0].energy, 0, 1000);
 		if (!KEY_DOWN(VK_LSHIFT))shot0_press = 0;
 
@@ -482,12 +482,12 @@ int main()
 		float dy = 0;
 		float da = 0;*/
 
-		for (int i = 0; i < obj_n; i++) //цикл обработки столкновений каждого объекта
+		for (int i = 0; i < obj_n; i++) //С†РёРєР» РѕР±СЂР°Р±РѕС‚РєРё СЃС‚РѕР»РєРЅРѕРІРµРЅРёР№ РєР°Р¶РґРѕРіРѕ РѕР±СЉРµРєС‚Р°
 		{
 			obj[i].dx = 0;
 			obj[i].dy = 0;
 			obj[i].da = 0;
-			for (int j = 0; j < obj[i].n; j++) //столкновение со стеной
+			for (int j = 0; j < obj[i].n; j++) //СЃС‚РѕР»РєРЅРѕРІРµРЅРёРµ СЃРѕ СЃС‚РµРЅРѕР№
 			{
 				if (obj[i].x + obj[i].c[j].l * sin((obj[i].angle + obj[i].c[j].a) / 57.3) < 0)
 				{
@@ -516,7 +516,7 @@ int main()
 				da += dx * cos((360 - angle - v4.a) / 57.3) / v4.l;
 			}*/
 
-			for (int j = 0; j < obj[i].n; j++) //столкновение со стеной
+			for (int j = 0; j < obj[i].n; j++) //СЃС‚РѕР»РєРЅРѕРІРµРЅРёРµ СЃРѕ СЃС‚РµРЅРѕР№
 			{
 				if (obj[i].y + obj[i].c[j].l * cos((obj[i].angle + obj[i].c[j].a) / 57.3) < 0)
 				{
@@ -546,7 +546,7 @@ int main()
 				da += dy * sin((360 - angle - v4.a) / 57.3) / v4.l;
 			}*/
 
-			for (int j = 0; j < obj[i].n; j++) //столкновение со стеной
+			for (int j = 0; j < obj[i].n; j++) //СЃС‚РѕР»РєРЅРѕРІРµРЅРёРµ СЃРѕ СЃС‚РµРЅРѕР№
 			{
 				if (obj[i].x + obj[i].c[j].l * sin((obj[i].angle + obj[i].c[j].a) / 57.3) > width)
 				{
@@ -555,7 +555,7 @@ int main()
 				}
 			}
 
-			for (int j = 0; j < obj[i].n; j++) //столкновение со стеной
+			for (int j = 0; j < obj[i].n; j++) //СЃС‚РѕР»РєРЅРѕРІРµРЅРёРµ СЃРѕ СЃС‚РµРЅРѕР№
 			{
 				if (obj[i].y + obj[i].c[j].l * cos((obj[i].angle + obj[i].c[j].a) / 57.3) > height)
 				{
@@ -564,7 +564,7 @@ int main()
 				}
 			}
 
-			obj[i].angle += obj[i].da * 57.3; //применение поправок к положению
+			obj[i].angle += obj[i].da * 57.3; //РїСЂРёРјРµРЅРµРЅРёРµ РїРѕРїСЂР°РІРѕРє Рє РїРѕР»РѕР¶РµРЅРёСЋ
 			obj[i].x += obj[i].dx;
 			obj[i].y += obj[i].dy;
 
@@ -572,39 +572,39 @@ int main()
 			obj[i].dy = 0;
 			obj[i].da = 0;
 
-			for (int k = 0; k < obj_n; k++) //перебираем другие объекты
+			for (int k = 0; k < obj_n; k++) //РїРµСЂРµР±РёСЂР°РµРј РґСЂСѓРіРёРµ РѕР±СЉРµРєС‚С‹
 			{
-				if (k != i && sqrt(pow(obj[i].x - obj[k].x, 2) + pow(obj[i].y - obj[k].y, 2)) < obj[i].max_dist+obj[k].max_dist+10) //если это не текущий объект и он не далеко
+				if (k != i && sqrt(pow(obj[i].x - obj[k].x, 2) + pow(obj[i].y - obj[k].y, 2)) < obj[i].max_dist+obj[k].max_dist+10) //РµСЃР»Рё СЌС‚Рѕ РЅРµ С‚РµРєСѓС‰РёР№ РѕР±СЉРµРєС‚ Рё РѕРЅ РЅРµ РґР°Р»РµРєРѕ
 				{
-					for (int j = 0; j < obj[i].n; j++) //перебираем углы текущего объекта
+					for (int j = 0; j < obj[i].n; j++) //РїРµСЂРµР±РёСЂР°РµРј СѓРіР»С‹ С‚РµРєСѓС‰РµРіРѕ РѕР±СЉРµРєС‚Р°
 					{
-						for (int n = 0; n < obj[k].n; n++) //перебираем стороны другого объекта
+						for (int n = 0; n < obj[k].n; n++) //РїРµСЂРµР±РёСЂР°РµРј СЃС‚РѕСЂРѕРЅС‹ РґСЂСѓРіРѕРіРѕ РѕР±СЉРµРєС‚Р°
 						{
 							pt a, b, c, d;
-							a.x = obj[i].x + obj[i].c[j].l * sin((obj[i].angle + obj[i].c[j].a) / 57.3); //координаты угла текущего объекта
+							a.x = obj[i].x + obj[i].c[j].l * sin((obj[i].angle + obj[i].c[j].a) / 57.3); //РєРѕРѕСЂРґРёРЅР°С‚С‹ СѓРіР»Р° С‚РµРєСѓС‰РµРіРѕ РѕР±СЉРµРєС‚Р°
 							a.y = obj[i].y + obj[i].c[j].l * cos((obj[i].angle + obj[i].c[j].a) / 57.3);
-							b.x = obj[i].x; //координаты центра текущего объекта
+							b.x = obj[i].x; //РєРѕРѕСЂРґРёРЅР°С‚С‹ С†РµРЅС‚СЂР° С‚РµРєСѓС‰РµРіРѕ РѕР±СЉРµРєС‚Р°
 							b.y = obj[i].y;
-							c.x = obj[k].x + obj[k].c[n].l * sin((obj[k].angle + obj[k].c[n].a) / 57.3); //координата конца стороны другого объекта
+							c.x = obj[k].x + obj[k].c[n].l * sin((obj[k].angle + obj[k].c[n].a) / 57.3); //РєРѕРѕСЂРґРёРЅР°С‚Р° РєРѕРЅС†Р° СЃС‚РѕСЂРѕРЅС‹ РґСЂСѓРіРѕРіРѕ РѕР±СЉРµРєС‚Р°
 							c.y = obj[k].y + obj[k].c[n].l * cos((obj[k].angle + obj[k].c[n].a) / 57.3);
 							if (n < obj[k].n - 1)
 							{
-								d.x = obj[k].x + obj[k].c[n+1].l * sin((obj[k].angle + obj[k].c[n+1].a) / 57.3); //координата конца стороны другого объекта
+								d.x = obj[k].x + obj[k].c[n+1].l * sin((obj[k].angle + obj[k].c[n+1].a) / 57.3); //РєРѕРѕСЂРґРёРЅР°С‚Р° РєРѕРЅС†Р° СЃС‚РѕСЂРѕРЅС‹ РґСЂСѓРіРѕРіРѕ РѕР±СЉРµРєС‚Р°
 								d.y = obj[k].y + obj[k].c[n+1].l * cos((obj[k].angle + obj[k].c[n+1].a) / 57.3);
 							}
 							else
 							{
-								d.x = obj[k].x + obj[k].c[0].l * sin((obj[k].angle + obj[k].c[0].a) / 57.3); //координата конца стороны другого объекта
+								d.x = obj[k].x + obj[k].c[0].l * sin((obj[k].angle + obj[k].c[0].a) / 57.3); //РєРѕРѕСЂРґРёРЅР°С‚Р° РєРѕРЅС†Р° СЃС‚РѕСЂРѕРЅС‹ РґСЂСѓРіРѕРіРѕ РѕР±СЉРµРєС‚Р°
 								d.y = obj[k].y + obj[k].c[0].l * cos((obj[k].angle + obj[k].c[0].a) / 57.3);
 							}
-							if (intersect(a, b, c, d)) //проверка пересечения
+							if (intersect(a, b, c, d)) //РїСЂРѕРІРµСЂРєР° РїРµСЂРµСЃРµС‡РµРЅРёСЏ
 							{
-								double dl = abs((d.y-c.y)*a.x+(c.x-d.x)*a.y-(d.y-c.y)*c.x-(c.x-d.x)*c.y)/sqrt(pow(d.y-c.y,2)+pow(d.x-c.x,2)); //длина вектора выталкивания
-								double d_angle = obj[k].angle + obj[k].s[n].a - 90; //напрваление вектора выталкивания
-								obj[i].dx += dl * sin(d_angle/57.3)*obj[k].mass / (obj[i].mass + obj[k].mass); //применение к текущему объекту
+								double dl = abs((d.y-c.y)*a.x+(c.x-d.x)*a.y-(d.y-c.y)*c.x-(c.x-d.x)*c.y)/sqrt(pow(d.y-c.y,2)+pow(d.x-c.x,2)); //РґР»РёРЅР° РІРµРєС‚РѕСЂР° РІС‹С‚Р°Р»РєРёРІР°РЅРёСЏ
+								double d_angle = obj[k].angle + obj[k].s[n].a - 90; //РЅР°РїСЂРІР°Р»РµРЅРёРµ РІРµРєС‚РѕСЂР° РІС‹С‚Р°Р»РєРёРІР°РЅРёСЏ
+								obj[i].dx += dl * sin(d_angle/57.3)*obj[k].mass / (obj[i].mass + obj[k].mass); //РїСЂРёРјРµРЅРµРЅРёРµ Рє С‚РµРєСѓС‰РµРјСѓ РѕР±СЉРµРєС‚Сѓ
 								obj[i].dy += dl * cos(d_angle/57.3)*obj[k].mass / (obj[i].mass + obj[k].mass);
 								obj[i].da -= dl * sin((180 - obj[i].c[j].a - obj[i].angle + d_angle) / 57.3) / obj[i].c[j].l*obj[k].mass / (obj[i].mass + obj[k].mass);
-								obj[k].x -= dl * sin(d_angle/57.3)*obj[i].mass / (obj[i].mass + obj[k].mass); //применение к другому объекту
+								obj[k].x -= dl * sin(d_angle/57.3)*obj[i].mass / (obj[i].mass + obj[k].mass); //РїСЂРёРјРµРЅРµРЅРёРµ Рє РґСЂСѓРіРѕРјСѓ РѕР±СЉРµРєС‚Сѓ
 								obj[k].y -= dl * cos(d_angle/57.3)*obj[i].mass / (obj[i].mass + obj[k].mass);
 								double e_angle = 57.3*atan((b.x - obj[k].x) / (obj[k].y - b.y));
 								double dl_k = sqrt(pow(b.x - obj[k].x, 2) + pow(b.y - obj[k].y, 2));
@@ -623,7 +623,7 @@ int main()
 			obj[i].x += obj[i].dx;
 			obj[i].y += obj[i].dy;
 
-			obj[i].sprite.setRotation(-obj[i].angle); //установка спрайта в нужное положение
+			obj[i].sprite.setRotation(-obj[i].angle); //СѓСЃС‚Р°РЅРѕРІРєР° СЃРїСЂР°Р№С‚Р° РІ РЅСѓР¶РЅРѕРµ РїРѕР»РѕР¶РµРЅРёРµ
 			obj[i].sprite.setPosition(obj[i].x, obj[i].y);
 
 			obj[i].v = 0;
@@ -683,20 +683,20 @@ int main()
 			convex1.setPoint(j, Vector2f(obj[3].x + obj[3].c[j].l * sin((obj[3].angle + obj[3].c[j].a) / 57.3), obj[3].y + obj[3].c[j].l * cos((obj[3].angle + obj[3].c[j].a) / 57.3)));
 		}*/
 
-		window.draw(bg); //отрисовка фона
+		window.draw(bg); //РѕС‚СЂРёСЃРѕРІРєР° С„РѕРЅР°
 		//window.draw(obj[0].sprite);
 		//window.draw(obj[1].sprite);
 		//window.draw(obj[2].sprite);
-		for (int i = 0; i < obj_n; i++) //отрисовка спрайтов
+		for (int i = 0; i < obj_n; i++) //РѕС‚СЂРёСЃРѕРІРєР° СЃРїСЂР°Р№С‚РѕРІ
 		{
 			window.draw(obj[i].sprite);
 		}
 		//window.draw(obj[0].bullet[0]);
 		for (int i = 0; i < 10; i++)
 		{
-			window.draw(obj[0].bullet[i]); //отрисовка пуль
+			window.draw(obj[0].bullet[i]); //РѕС‚СЂРёСЃРѕРІРєР° РїСѓР»СЊ
 		}
-		window.draw(energy1_bar); //отрисовка полоски энергии
+		window.draw(energy1_bar); //РѕС‚СЂРёСЃРѕРІРєР° РїРѕР»РѕСЃРєРё СЌРЅРµСЂРіРёРё
 		window.draw(energy1);
 		//window.draw(convex);
 		//window.draw(convex1);
@@ -705,8 +705,8 @@ int main()
 			window.draw(bull1);
 			shot++;
 		}*/
-		window.display(); //вывод на экран
-		Sleep(1); //ждем 1 мс
+		window.display(); //РІС‹РІРѕРґ РЅР° СЌРєСЂР°РЅ
+		Sleep(1); //Р¶РґРµРј 1 РјСЃ
 	}
 
 	return 0;
