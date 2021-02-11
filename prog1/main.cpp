@@ -99,7 +99,7 @@ int main()
 	RenderWindow window(VideoMode(width, height), "prog1"); //создаем окно
 
 	Texture background; //открываем картинку бэкграунда
-	background.loadFromFile("C:\\С++\\infa_project\\prog1\\background.png");
+	background.loadFromFile("..\\background.png");
 	Sprite bg(background);
 
 	RectangleShape energy1; //создаем полоску энергии первого марсохода
@@ -112,7 +112,7 @@ int main()
 	energy1_bar.setFillColor(Color(0, 0, 0, 128));
 
 	Texture texture1; //текстура первого марсохода
-	texture1.loadFromFile("C:\\С++\\infa_project\\prog1\\rover_new1.png");
+	texture1.loadFromFile("..\\rover_new1.png");
 	obj[0].sprite.setTexture(texture1);
 	obj[0].sprite.setOrigin(25, 40);
 
@@ -161,7 +161,7 @@ int main()
 	obj[0].s[7].l = 62;
 
 	Texture texture1_1; //текстура пуль первого марсохода
-	texture1_1.loadFromFile("C:\\С++\\infa_project\\prog1\\bull.png");
+	texture1_1.loadFromFile("..\\bull.png");
 	for (int i = 0; i < 10; i++)
 	{
 		obj[0].bullet[i].setTexture(texture1_1);
@@ -173,7 +173,7 @@ int main()
 	bool shot0_press = false; //предыдущее состояние кнопки выстрела
 
 	Texture texture2;
-	texture2.loadFromFile("C:\\С++\\infa_project\\prog1\\rover_new2.png");
+	texture2.loadFromFile("..\\rover_new2.png");
 	obj[1].sprite.setTexture(texture2);
 	obj[1].sprite.setOrigin(25, 40);
 	obj[1].x = 800;
@@ -219,7 +219,7 @@ int main()
 
 
 	Texture texture3;
-	texture3.loadFromFile("C:\\С++\\infa_project\\prog1\\box.png");
+	texture3.loadFromFile("..\\box.png");
 	obj[2].sprite.setTexture(texture3);
 	obj[2].sprite.setOrigin(11, 11);
 	obj[2].x = 600;
@@ -574,7 +574,7 @@ int main()
 
 			for (int k = 0; k < obj_n; k++) //перебираем другие объекты
 			{
-				if (k != i && sqrt(pow(obj[i].x - obj[k].x, 2) + pow(obj[i].y - obj[k].y, 2)) < obj[i].max_dist+obj[k].max_dist+10) //если это не текущий объект и он не далеко
+				if (k != i && sq(obj[i].x - obj[k].x) + sq(obj[i].y - obj[k].y) < sq(obj[i].max_dist+obj[k].max_dist+10)) //если это не текущий объект и он не далеко
 				{
 					for (int j = 0; j < obj[i].n; j++) //перебираем углы текущего объекта
 					{
@@ -599,7 +599,7 @@ int main()
 							}
 							if (intersect(a, b, c, d)) //проверка пересечения
 							{
-								double dl = abs((d.y-c.y)*a.x+(c.x-d.x)*a.y-(d.y-c.y)*c.x-(c.x-d.x)*c.y)/sqrt(pow(d.y-c.y,2)+pow(d.x-c.x,2)); //длина вектора выталкивания
+								double dl = abs((d.y-c.y)*a.x+(c.x-d.x)*a.y-(d.y-c.y)*c.x-(c.x-d.x)*c.y)/sqrt(sq(d.y-c.y)+sq(d.x-c.x)); //длина вектора выталкивания
 								double d_angle = obj[k].angle + obj[k].s[n].a - 90; //напрваление вектора выталкивания
 								obj[i].dx += dl * sin(d_angle/57.3)*obj[k].mass / (obj[i].mass + obj[k].mass); //применение к текущему объекту
 								obj[i].dy += dl * cos(d_angle/57.3)*obj[k].mass / (obj[i].mass + obj[k].mass);
@@ -607,7 +607,7 @@ int main()
 								obj[k].x -= dl * sin(d_angle/57.3)*obj[i].mass / (obj[i].mass + obj[k].mass); //применение к другому объекту
 								obj[k].y -= dl * cos(d_angle/57.3)*obj[i].mass / (obj[i].mass + obj[k].mass);
 								double e_angle = 57.3*atan((b.x - obj[k].x) / (obj[k].y - b.y));
-								double dl_k = sqrt(pow(b.x - obj[k].x, 2) + pow(b.y - obj[k].y, 2));
+								double dl_k = sqrt(sq(b.x - obj[k].x) + sq(b.y - obj[k].y));
 								obj[k].angle += 57.3*dl*sin((e_angle - d_angle) / 57.3) / dl_k * obj[i].mass / (obj[i].mass + obj[k].mass);
 								//A = (y2-y1)
 								//B = (x2-x1)
@@ -636,9 +636,10 @@ int main()
 				obj[0].bullet[i].setRotation(-obj[0].bullet_angle[i]);
 				//obj[0].bullet_x[i] = obj[0].bullet_x[i] - bullet_v * sin(obj[0].bullet_angle[i] / 57.3);
 				//obj[0].bullet_y[i] = obj[0].bullet_y[i] - bullet_v * cos(obj[0].bullet_angle[i] / 57.3);
+
 				for (int k = 0; k < obj_n; k++)
 				{
-					if (k != 0 && sq(obj[0].bullet[i].x - obj[k].x) + sq(obj[0].bullet[i].y - obj[k].y) < sq(bullet_v + obj[k].max_dist + 10))
+					if (k != 0 && sq(obj[0].bullet_x[i] - obj[k].x) + sq(obj[0].bullet_y[i] - obj[k].y) < sq(bullet_v + obj[k].max_dist + 10))
 					{
 						for (int n = 0; n < obj[k].n; n++)
 						{
@@ -661,7 +662,9 @@ int main()
 							}
 							if (intersect(a, b, c, d))
 							{
-
+								//A = (y2-y1)
+								//B = (x2-x1)
+								//C = -A*x1 - B*y1
 							}
 						}
 					}
