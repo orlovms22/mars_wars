@@ -628,6 +628,25 @@ int main()
 
 			obj[i].v = 0;
 		}
+
+		window.draw(bg); //отрисовка фона
+		//window.draw(obj[0].sprite);
+		//window.draw(obj[1].sprite);
+		//window.draw(obj[2].sprite);
+		for (int i = 0; i < obj_n; i++) //отрисовка спрайтов
+		{
+			window.draw(obj[i].sprite);
+		}
+		//window.draw(obj[0].bullet[0]);
+		for (int i = 0; i < 10; i++)
+		{
+			window.draw(obj[0].bullet[i]); //отрисовка пуль
+		}
+
+		//CircleShape circle(3);
+		//circle.setFillColor(Color(255, 0, 0));
+		//CircleShape circle1(3);
+		//circle1.setFillColor(Color(0, 255, 0));
 		for (int i = 0; i < 10; i++)
 		{
 			if ((obj[0].bullet_shot >> i) % 2)
@@ -636,7 +655,10 @@ int main()
 				obj[0].bullet[i].setRotation(-obj[0].bullet_angle[i]);
 				//obj[0].bullet_x[i] = obj[0].bullet_x[i] - bullet_v * sin(obj[0].bullet_angle[i] / 57.3);
 				//obj[0].bullet_y[i] = obj[0].bullet_y[i] - bullet_v * cos(obj[0].bullet_angle[i] / 57.3);
-
+				double min_x = obj[0].bullet_x[i] - bullet_v * sin(obj[0].bullet_angle[i] / 57.3);
+				double min_y = obj[0].bullet_y[i] - bullet_v * cos(obj[0].bullet_angle[i] / 57.3);
+				int n_object = -1;
+				int s_object = -1;
 				for (int k = 0; k < obj_n; k++)
 				{
 					if (k != 0 && sq(obj[0].bullet_x[i] - obj[k].x) + sq(obj[0].bullet_y[i] - obj[k].y) < sq(bullet_v + obj[k].max_dist + 10))
@@ -646,6 +668,7 @@ int main()
 							pt a, b, c, d;
 							a.x = obj[0].bullet_x[i] - bullet_v * sin(obj[0].bullet_angle[i] / 57.3);
 							a.y = obj[0].bullet_y[i] - bullet_v * cos(obj[0].bullet_angle[i] / 57.3);
+							//circle1.setPosition(a.x, a.y);
 							b.x = obj[0].bullet_x[i];
 							b.y = obj[0].bullet_y[i];
 							c.x = obj[k].x + obj[k].c[n].l * sin((obj[k].angle + obj[k].c[n].a) / 57.3);
@@ -662,19 +685,59 @@ int main()
 							}
 							if (intersect(a, b, c, d))
 							{
-								//A = (y2-y1)
-								//B = (x2-x1)
-								//C = -A*x1 - B*y1
+								double k1 = (a.y - b.y) / (a.x - b.x);
+								double p1 = a.y - k1 * a.x;
+
+								double k2 = (c.y - d.y) / (c.x - d.x);
+								double p2 = c.y - k2 * c.x;
+
+								double x0 = (p1 - p2) / (k2 - k1);
+								double y0 = k1 * x0 + p1;
+								//circle.setPosition(x0, y0);
+								if (sq(b.x - x0) + sq(b.y - y0) < sq(b.x - min_x) + sq(b.y - min_y))
+								{
+									min_x = x0;
+									min_y = y0;
+									n_object = k;
+									s_object = n;
+								}
 							}
 						}
 					}
 				}
+				min_x += 3 * sin(obj[0].bullet_angle[i] / 57.3);
+				min_y += 3 * cos(obj[0].bullet_angle[i] / 57.3);
+				//circle.setPosition(min_x, min_y);
+				if (n_object != -1)
+				{
+					double d_angle = obj[n_object].angle + obj[n_object].s[s_object].a - 90;
+					obj[n_object].x -= 5 * sin(d_angle / 57.3)*obj[i].mass / (obj[i].mass + obj[n_object].mass);
+					obj[n_object].y -= 5 * cos(d_angle / 57.3)*obj[i].mass / (obj[i].mass + obj[n_object].mass);
+					double dl_k = sqrt(sq(min_x - obj[n_object].x) + sq(min_y - obj[n_object].y));
+					double e_angle = 57.3*atan((min_x - obj[n_object].x) / (obj[n_object].y - min_y));
+					obj[n_object].angle += 57.3*5*sin((e_angle - d_angle) / 57.3) / dl_k * obj[i].mass / (obj[i].mass + obj[n_object].mass);
+
+					//obj[n_object].x -= 5*sin(obj[0].bullet_angle[i] / 57.3);
+					//obj[n_object].y -= 5*cos(obj[0].bullet_angle[i] / 57.3);
+					obj[0].bullet_shot &= ~(1 << i);
+				}
+				obj[0].bullet_x[i] = min_x;
+				obj[0].bullet_y[i] = min_y;
+				obj[0].bullet[i].setPosition(obj[0].bullet_x[i], obj[0].bullet_y[i]);
+			}
+			else
+			{
+				obj[0].bullet_x[i] = -30;
+				obj[0].bullet_y[i] = -30;
+				obj[0].bullet[i].setPosition(-30, -30);
 			}
 			if (obj[0].bullet_x[i] > width + 30 || obj[0].bullet_x[i] < -30 || obj[0].bullet_y[i] < -30 || obj[0].bullet_y[i] > height + 30)
 			{
 				obj[0].bullet_shot &= ~(1 << i);
 			}
 		}
+		//window.draw(circle);
+		//window.draw(circle1);
 
 		/*for (int j = 0; j < 4; j++)
 		{
@@ -686,7 +749,7 @@ int main()
 			convex1.setPoint(j, Vector2f(obj[3].x + obj[3].c[j].l * sin((obj[3].angle + obj[3].c[j].a) / 57.3), obj[3].y + obj[3].c[j].l * cos((obj[3].angle + obj[3].c[j].a) / 57.3)));
 		}*/
 
-		window.draw(bg); //отрисовка фона
+		/*window.draw(bg); //отрисовка фона
 		//window.draw(obj[0].sprite);
 		//window.draw(obj[1].sprite);
 		//window.draw(obj[2].sprite);
@@ -698,7 +761,7 @@ int main()
 		for (int i = 0; i < 10; i++)
 		{
 			window.draw(obj[0].bullet[i]); //отрисовка пуль
-		}
+		}*/
 		window.draw(energy1_bar); //отрисовка полоски энергии
 		window.draw(energy1);
 		//window.draw(convex);
