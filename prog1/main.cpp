@@ -90,6 +90,7 @@ struct object //структура объекта на поле
 	int bullet_shot;
 	uint8_t reg;
 	int16_t energy;
+	int16_t hp;
 };
 
 object obj[obj_n]; //создание объектов
@@ -111,6 +112,15 @@ int main()
 	energy1_bar.setPosition(20, 20);
 	energy1_bar.setFillColor(Color(0, 0, 0, 128));
 
+	RectangleShape hp1; //полоска жизней первого марсохода
+	hp1.setSize(Vector2f(200, 20));
+	hp1.setPosition(20, 50);
+	hp1.setFillColor(Color(255, 0, 0, 128));
+	RectangleShape hp1_bar; //создаем фон полоски жизней первого марсохода
+	hp1_bar.setSize(Vector2f(200, 20));
+	hp1_bar.setPosition(20, 50);
+	hp1_bar.setFillColor(Color(0, 0, 0, 128));
+
 	Texture texture1; //текстура первого марсохода
 	texture1.loadFromFile("..\\rover_new1.png");
 	obj[0].sprite.setTexture(texture1);
@@ -123,6 +133,7 @@ int main()
 
 	obj[0].mass = 1; //масса марсохода
 	obj[0].energy = 1000; //энергия марсохода
+	obj[0].hp = 1000; //жизни марсохода
 
 	obj[0].n = 8; //задаем углы марсохода
 	obj[0].c[0].a = -38.88;
@@ -172,6 +183,24 @@ int main()
 	obj[0].reg = 1; //режим стрельбы первого марсохода
 	bool shot0_press = false; //предыдущее состояние кнопки выстрела
 
+	RectangleShape energy2; //создаем полоску энергии второго марсохода
+	energy2.setSize(Vector2f(200, 20));
+	energy2.setPosition(width - 220, 20);
+	energy2.setFillColor(Color(0, 255, 0, 128));
+	RectangleShape energy2_bar; //создаем фон полоски энергии второго марсохода
+	energy2_bar.setSize(Vector2f(200, 20));
+	energy2_bar.setPosition(width - 220, 20);
+	energy2_bar.setFillColor(Color(0, 0, 0, 128));
+
+	RectangleShape hp2; //полоска жизней второго марсохода
+	hp2.setSize(Vector2f(200, 20));
+	hp2.setPosition(width - 220, 50);
+	hp2.setFillColor(Color(255, 0, 0, 128));
+	RectangleShape hp2_bar; //создаем фон полоски жизней второго марсохода
+	hp2_bar.setSize(Vector2f(200, 20));
+	hp2_bar.setPosition(width - 220, 50);
+	hp2_bar.setFillColor(Color(0, 0, 0, 128));
+
 	Texture texture2;
 	texture2.loadFromFile("..\\rover_new2.png");
 	obj[1].sprite.setTexture(texture2);
@@ -180,7 +209,11 @@ int main()
 	obj[1].y = 400;
 	obj[1].angle = 0;
 	obj[1].v = 0;
+
 	obj[1].mass = 1;
+	obj[1].energy = 1000; //энергия марсохода
+	obj[1].hp = 1000; //жизни марсохода
+
 	obj[1].n = 8;
 	obj[1].c[0].a = -38.88;
 	obj[1].c[0].l = 40;
@@ -711,11 +744,13 @@ int main()
 				if (n_object != -1)
 				{
 					double d_angle = obj[n_object].angle + obj[n_object].s[s_object].a - 90;
-					obj[n_object].x -= 5 * sin(d_angle / 57.3)*obj[i].mass / (obj[i].mass + obj[n_object].mass);
-					obj[n_object].y -= 5 * cos(d_angle / 57.3)*obj[i].mass / (obj[i].mass + obj[n_object].mass);
+					obj[n_object].x -= 5 * sin(obj[0].bullet_angle[i] / 57.3);
+					obj[n_object].y -= 5 * cos(obj[0].bullet_angle[i] / 57.3);
 					double dl_k = sqrt(sq(min_x - obj[n_object].x) + sq(min_y - obj[n_object].y));
-					double e_angle = 57.3*atan((min_x - obj[n_object].x) / (obj[n_object].y - min_y));
-					obj[n_object].angle += 57.3*5*sin((e_angle - d_angle) / 57.3) / dl_k * obj[i].mass / (obj[i].mass + obj[n_object].mass);
+					double e_angle = 57.3*atan(-(min_x - obj[n_object].x) / (obj[n_object].y - min_y));
+					obj[n_object].angle += 57.3*5*sin((e_angle - d_angle) / 57.3) / dl_k;
+
+					obj[n_object].hp -= 200;
 
 					//obj[n_object].x -= 5*sin(obj[0].bullet_angle[i] / 57.3);
 					//obj[n_object].y -= 5*cos(obj[0].bullet_angle[i] / 57.3);
@@ -764,6 +799,13 @@ int main()
 		}*/
 		window.draw(energy1_bar); //отрисовка полоски энергии
 		window.draw(energy1);
+		window.draw(hp1_bar); //отрисовка полоски жизней
+		window.draw(hp1);
+
+		window.draw(energy2_bar); //отрисовка полоски энергии
+		window.draw(energy2);
+		window.draw(hp2_bar); //отрисовка полоски жизней
+		window.draw(hp2);
 		//window.draw(convex);
 		//window.draw(convex1);
 		/*if (shot)
