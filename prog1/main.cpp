@@ -171,11 +171,11 @@ int main()
 	obj[0].s[7].a = 0;
 	obj[0].s[7].l = 62;
 
-	Texture texture1_1; //текстура пуль первого марсохода
-	texture1_1.loadFromFile("..\\bull.png");
+	Texture texture_bullet; //текстура пуль первого марсохода
+	texture_bullet.loadFromFile("..\\bull.png");
 	for (int i = 0; i < 10; i++)
 	{
-		obj[0].bullet[i].setTexture(texture1_1);
+		obj[0].bullet[i].setTexture(texture_bullet);
 		obj[0].bullet[i].setPosition(-10, -10);
 		obj[0].bullet[i].setOrigin(3, 7);
 	}
@@ -250,6 +250,15 @@ int main()
 	obj[1].s[7].a = 0;
 	obj[1].s[7].l = 62;
 
+	for (int i = 0; i < 10; i++)
+	{
+		obj[1].bullet[i].setTexture(texture_bullet);
+		obj[1].bullet[i].setPosition(-10, -10);
+		obj[1].bullet[i].setOrigin(3, 7);
+	}
+	obj[1].bullet_shot = 0; //биты состояния пуль 1 - летит / 0 - ожидание
+	obj[1].reg = 1; //режим стрельбы второго марсохода
+	bool shot1_press = false; //предыдущее состояние кнопки выстрела
 
 	Texture texture3;
 	texture3.loadFromFile("..\\box.png");
@@ -486,34 +495,106 @@ int main()
 			}
 			shot0_press = 1;
 		}
+		if (!KEY_DOWN(VK_LSHIFT))shot0_press = 0;
+
 		energy1.setSize(Vector2f(obj[0].energy/5, 20)); //установка размера полоски энергии
 		obj[0].energy+=2; //накопление энергии
 		constrain(obj[0].energy, 0, 1000);
-		if (!KEY_DOWN(VK_LSHIFT))shot0_press = 0;
 
-		/*if (KEY_PUSH(0x5A) && shot == 0)
+		hp1.setSize(Vector2f(obj[0].hp / 5, 20)); //установка размера полоски жизней
+		constrain(obj[0].hp, 0, 1000);
+
+		energy2.setSize(Vector2f(obj[1].energy / 5, 20)); //установка размера полоски энергии
+		obj[1].energy += 2; //накопление энергии
+		constrain(obj[1].energy, 0, 1000);
+
+		hp2.setSize(Vector2f(obj[1].hp / 5, 20)); //установка размера полоски жизней
+		constrain(obj[1].hp, 0, 1000);
+
+
+		if (KEY_DOWN(VK_RCONTROL)) obj[1].energy -= 4; //включение режима ускорения
+		if (KEY_DOWN(VK_DOWN)) //отработка нажатий клавиш
 		{
-			shot = 1;
-			bull1.setPosition(sprite.getPosition());
-			bull1.setRotation(angle);
-			angle_b = angle;
-			bull1.move(15 * sin(angle_b / 57.3), -15 * cos(angle_b / 57.3));
-		}*/
+			if (!KEY_DOWN(VK_RCONTROL) || obj[1].energy < 0) obj[1].v = -v_max;
+			else obj[1].v = -v_max * 1.5;
+		}
+		if (KEY_DOWN(VK_UP))
+		{
+			if (!KEY_DOWN(VK_RCONTROL) || obj[1].energy < 0) obj[1].v = v_max;
+			else obj[1].v = v_max * 1.5;
+		}
+		if (KEY_DOWN(VK_LEFT))
+		{
+			if (!KEY_DOWN(VK_RCONTROL) || obj[1].energy < 0) obj[1].angle += angle_max;
+			else obj[1].angle += angle_max * 1.5;
+		}
+		if (KEY_DOWN(VK_RIGHT))
+		{
+			if (!KEY_DOWN(VK_RCONTROL) || obj[1].energy < 0) obj[1].angle -= angle_max;
+			else obj[1].angle -= angle_max * 1.5;
+		}
 
-		if (KEY_DOWN(VK_UP)) obj[1].v = v_max;
-		if (KEY_DOWN(VK_DOWN)) obj[1].v = -v_max;
-		if (KEY_DOWN(VK_LEFT)) obj[1].angle += angle_max;
-		if (KEY_DOWN(VK_RIGHT)) obj[1].angle -= angle_max;
+		if (KEY_DOWN(VK_RSHIFT) && shot1_press == 0) //обработка выстрела 
+		{
+			if (obj[1].reg == 1 && obj[1].energy > 300) //проверка режима и энергии | одиночный режим
+			{
+				int i = 0;
+				while ((obj[1].bullet_shot >> i) % 2) //поиск свободной пули
+				{
+					i++;
+				}
+				obj[1].bullet_shot |= 1 << i; //устанавливаем бит полета пули
+				obj[1].bullet_angle[i] = obj[1].angle; //задаем направление и положение
+				obj[1].bullet_x[i] = obj[1].x - 15 * sin(obj[1].angle / 57.3);
+				obj[1].bullet_y[i] = obj[1].y - 15 * cos(obj[1].angle / 57.3);
+				obj[1].energy -= 300;
+
+				obj[1].x -= 5 * sin(-obj[1].angle / 57.3); //отдача
+				obj[1].y += 5 * cos(-obj[1].angle / 57.3);
+			}
+			if (obj[1].reg == 2 && obj[1].energy > 500) //проверка режима и энергии | режим тройного выстрела
+			{
+				int i = 0;
+				while ((obj[1].bullet_shot >> i) % 2) //поиск свободной пули
+				{
+					i++;
+				}
+				obj[1].bullet_shot |= 1 << i; //устанавливаем бит полета пули
+				obj[1].bullet_angle[i] = obj[1].angle; //задаем направление и положение
+				obj[1].bullet_x[i] = obj[1].x - 15 * sin(obj[1].angle / 57.3);
+				obj[1].bullet_y[i] = obj[1].y - 15 * cos(obj[1].angle / 57.3);
+				i = 0;
+				while ((obj[1].bullet_shot >> i) % 2) //поиск свободной пули
+				{
+					i++;
+				}
+				obj[1].bullet_shot |= 1 << i; //устанавливаем бит полета пули
+				obj[1].bullet_angle[i] = obj[1].angle + 10; //задаем направление и положение
+				obj[1].bullet_x[i] = obj[1].x - 15 * sin(obj[1].angle / 57.3);
+				obj[1].bullet_y[i] = obj[1].y - 15 * cos(obj[1].angle / 57.3);
+				i = 0;
+				while ((obj[1].bullet_shot >> i) % 2) //поиск свободной пули
+				{
+					i++;
+				}
+				obj[1].bullet_shot |= 1 << i; //устанавливаем бит полета пули
+				obj[1].bullet_angle[i] = obj[1].angle - 10;//задаем направление и положение
+				obj[1].bullet_x[i] = obj[1].x - 15 * sin(obj[1].angle / 57.3);
+				obj[1].bullet_y[i] = obj[1].y - 15 * cos(obj[1].angle / 57.3);
+				obj[1].energy -= 500;
+
+				obj[1].x -= 8 * sin(-obj[1].angle / 57.3); //отдача
+				obj[1].y += 8 * cos(-obj[1].angle / 57.3);
+			}
+			shot1_press = 1;
+		}
+		if (!KEY_DOWN(VK_RSHIFT))shot1_press = 0;
 		
-		//sprite.move(v*sin(angle / 57.3), -v * cos(angle / 57.3));
-		obj[0].x -= obj[0].v * sin(-obj[0].angle / 57.3);
+		obj[0].x -= obj[0].v * sin(-obj[0].angle / 57.3); //изменение позициии первого марсохода 
 		obj[0].y += obj[0].v * cos(-obj[0].angle / 57.3);
 
-		obj[1].x += obj[1].v * sin(-obj[1].angle / 57.3);
+		obj[1].x += obj[1].v * sin(-obj[1].angle / 57.3); //изменение позиции второго марсохода
 		obj[1].y -= obj[1].v * cos(-obj[1].angle / 57.3);
-		/*float dx = 0;
-		float dy = 0;
-		float da = 0;*/
 
 		for (int i = 0; i < obj_n; i++) //цикл обработки столкновений каждого объекта
 		{
@@ -528,26 +609,6 @@ int main()
 					obj[i].da -= (obj[i].x + obj[i].c[j].l * sin((obj[i].angle + obj[i].c[j].a) / 57.3))*cos((360 - obj[i].angle - obj[i].c[j].a) / 57.3) / obj[i].c[j].l;
 				}
 			}
-			/*if (0 > obj[i].x + v1.l*sin((angle + v1.a) / 57.3))
-			{
-				dx -= x + v1.l*sin((angle + v1.a) / 57.3);
-				da += dx * cos((360 - angle - v1.a) / 57.3) / v1.l;
-			}
-			if (0 > x + v2.l*sin((angle + v2.a) / 57.3))
-			{
-				dx -= x + v2.l*sin((angle + v2.a) / 57.3);
-				da += dx * cos((360 - angle - v2.a) / 57.3) / v2.l;
-			}
-			if (0 > x + v3.l*sin((angle + v3.a) / 57.3))
-			{
-				dx -= x + v3.l*sin((angle + v3.a) / 57.3);
-				da += dx * cos((360 - angle - v3.a) / 57.3) / v3.l;
-			}
-			if (0 > x + v4.l*sin((angle + v4.a) / 57.3))
-			{
-				dx -= x + v4.l*sin((angle + v4.a) / 57.3);
-				da += dx * cos((360 - angle - v4.a) / 57.3) / v4.l;
-			}*/
 
 			for (int j = 0; j < obj[i].n; j++) //столкновение со стеной
 			{
@@ -557,27 +618,6 @@ int main()
 					obj[i].da -= (obj[i].y + obj[i].c[j].l * cos((obj[i].angle + obj[i].c[j].a) / 57.3))*sin((360 - obj[i].angle - obj[i].c[j].a) / 57.3) / obj[i].c[j].l;
 				}
 			}
-
-			/*if (0 > y + v1.l*cos((angle + v1.a) / 57.3))
-			{
-				dy -= y + v1.l*cos((angle + v1.a) / 57.3);
-				da += dy * sin((360 - angle - v1.a) / 57.3) / v1.l;
-			}
-			if (0 > y + v2.l*cos((angle + v2.a) / 57.3))
-			{
-				dy -= y + v2.l*cos((angle + v2.a) / 57.3);
-				da += dy * sin((360 - angle - v2.a) / 57.3) / v2.l;
-			}
-			if (0 > y + v3.l*cos((angle + v3.a) / 57.3))
-			{
-				dy -= y + v3.l*cos((angle + v3.a) / 57.3);
-				da += dy * sin((360 - angle - v3.a) / 57.3) / v3.l;
-			}
-			if (0 > y + v4.l*cos((angle + v4.a) / 57.3))
-			{
-				dy -= y + v4.l*cos((angle + v4.a) / 57.3);
-				da += dy * sin((360 - angle - v4.a) / 57.3) / v4.l;
-			}*/
 
 			for (int j = 0; j < obj[i].n; j++) //столкновение со стеной
 			{
@@ -639,7 +679,9 @@ int main()
 								obj[i].da -= dl * sin((180 - obj[i].c[j].a - obj[i].angle + d_angle) / 57.3) / obj[i].c[j].l*obj[k].mass / (obj[i].mass + obj[k].mass);
 								obj[k].x -= dl * sin(d_angle/57.3)*obj[i].mass / (obj[i].mass + obj[k].mass); //применение к другому объекту
 								obj[k].y -= dl * cos(d_angle/57.3)*obj[i].mass / (obj[i].mass + obj[k].mass);
-								double e_angle = 57.3*atan((b.x - obj[k].x) / (obj[k].y - b.y));
+								double e_angle = 57.3*atan((b.x - obj[k].x) / (b.y - obj[k].y));
+								if (b.x - obj[k].x < 0 && b.y - obj[k].y < 0) e_angle += 180;
+								if (b.y - obj[k].y < 0 && b.x - obj[k].x > 0) e_angle += 180;
 								double dl_k = sqrt(sq(b.x - obj[k].x) + sq(b.y - obj[k].y));
 								obj[k].angle += 57.3*dl*sin((e_angle - d_angle) / 57.3) / dl_k * obj[i].mass / (obj[i].mass + obj[k].mass);
 								//A = (y2-y1)
@@ -663,40 +705,31 @@ int main()
 		}
 
 		window.draw(bg); //отрисовка фона
-		//window.draw(obj[0].sprite);
-		//window.draw(obj[1].sprite);
-		//window.draw(obj[2].sprite);
 		for (int i = 0; i < obj_n; i++) //отрисовка спрайтов
 		{
 			window.draw(obj[i].sprite);
 		}
 		//window.draw(obj[0].bullet[0]);
-		for (int i = 0; i < 10; i++)
-		{
-			window.draw(obj[0].bullet[i]); //отрисовка пуль
-		}
 
 		//CircleShape circle(3);
 		//circle.setFillColor(Color(255, 0, 0));
 		//CircleShape circle1(3);
 		//circle1.setFillColor(Color(0, 255, 0));
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < 10; i++) //обработка пуль первого объекта
 		{
-			if ((obj[0].bullet_shot >> i) % 2)
+			if ((obj[0].bullet_shot >> i) % 2) //если пуля летит
 			{
-				obj[0].bullet[i].setPosition(obj[0].bullet_x[i], obj[0].bullet_y[i]);
+				obj[0].bullet[i].setPosition(obj[0].bullet_x[i], obj[0].bullet_y[i]); //задаем позицию спрайта
 				obj[0].bullet[i].setRotation(-obj[0].bullet_angle[i]);
-				//obj[0].bullet_x[i] = obj[0].bullet_x[i] - bullet_v * sin(obj[0].bullet_angle[i] / 57.3);
-				//obj[0].bullet_y[i] = obj[0].bullet_y[i] - bullet_v * cos(obj[0].bullet_angle[i] / 57.3);
-				double min_x = obj[0].bullet_x[i] - bullet_v * sin(obj[0].bullet_angle[i] / 57.3);
+				double min_x = obj[0].bullet_x[i] - bullet_v * sin(obj[0].bullet_angle[i] / 57.3); //позиция точки куда пуля прилетит
 				double min_y = obj[0].bullet_y[i] - bullet_v * cos(obj[0].bullet_angle[i] / 57.3);
-				int n_object = -1;
-				int s_object = -1;
-				for (int k = 0; k < obj_n; k++)
+				int n_object = -1; //номер обекта в который попали
+				int s_object = -1; //сторона объекта в который попали
+				for (int k = 0; k < obj_n; k++) //перебираем другие объекты
 				{
-					if (k != 0 && sq(obj[0].bullet_x[i] - obj[k].x) + sq(obj[0].bullet_y[i] - obj[k].y) < sq(bullet_v + obj[k].max_dist + 10))
+					if (k != 0 && sq(obj[0].bullet_x[i] - obj[k].x) + sq(obj[0].bullet_y[i] - obj[k].y) < sq(bullet_v + obj[k].max_dist + 10)) //если они достаточно близко
 					{
-						for (int n = 0; n < obj[k].n; n++)
+						for (int n = 0; n < obj[k].n; n++) //перебираем стороны объекта
 						{
 							pt a, b, c, d;
 							a.x = obj[0].bullet_x[i] - bullet_v * sin(obj[0].bullet_angle[i] / 57.3);
@@ -716,7 +749,7 @@ int main()
 								d.x = obj[k].x + obj[k].c[0].l * sin((obj[k].angle + obj[k].c[0].a) / 57.3);
 								d.y = obj[k].y + obj[k].c[0].l * cos((obj[k].angle + obj[k].c[0].a) / 57.3);
 							}
-							if (intersect(a, b, c, d))
+							if (intersect(a, b, c, d)) //проверяем пересечение траектории пули с стороной объекта
 							{
 								double k1 = (a.y - b.y) / (a.x - b.x);
 								double p1 = a.y - k1 * a.x;
@@ -724,51 +757,137 @@ int main()
 								double k2 = (c.y - d.y) / (c.x - d.x);
 								double p2 = c.y - k2 * c.x;
 
-								double x0 = (p1 - p2) / (k2 - k1);
+								double x0 = (p1 - p2) / (k2 - k1); //вычисляем точку пересечения
 								double y0 = k1 * x0 + p1;
 								//circle.setPosition(x0, y0);
-								if (sq(b.x - x0) + sq(b.y - y0) < sq(b.x - min_x) + sq(b.y - min_y))
+								if (sq(b.x - x0) + sq(b.y - y0) < sq(b.x - min_x) + sq(b.y - min_y)) //если она ближе к текущему положению пули
 								{
-									min_x = x0;
+									min_x = x0; //записываем точку пересечения с объектом
 									min_y = y0;
-									n_object = k;
-									s_object = n;
+									n_object = k; //номер объекта
+									s_object = n; //и его сторону
 								}
 							}
 						}
 					}
 				}
-				min_x += 3 * sin(obj[0].bullet_angle[i] / 57.3);
+				min_x += 3 * sin(obj[0].bullet_angle[i] / 57.3); //немного сдвигаем пулю назад
 				min_y += 3 * cos(obj[0].bullet_angle[i] / 57.3);
-				//circle.setPosition(min_x, min_y);
-				if (n_object != -1)
+				if (n_object != -1) //если пересечение с объектом было
 				{
-					double d_angle = obj[n_object].angle + obj[n_object].s[s_object].a - 90;
+					double d_angle = obj[n_object].angle + obj[n_object].s[s_object].a - 90; //вычисляем отталкивание объекта
 					obj[n_object].x -= 5 * sin(obj[0].bullet_angle[i] / 57.3);
 					obj[n_object].y -= 5 * cos(obj[0].bullet_angle[i] / 57.3);
 					double dl_k = sqrt(sq(min_x - obj[n_object].x) + sq(min_y - obj[n_object].y));
-					double e_angle = 57.3*atan(-(min_x - obj[n_object].x) / (obj[n_object].y - min_y));
-					obj[n_object].angle += 57.3*5*sin((e_angle - d_angle) / 57.3) / dl_k;
+					double e_angle = 57.3*atan((obj[n_object].x - min_x) / (obj[n_object].y - min_y));
+					if (obj[n_object].x - min_x < 0 && obj[n_object].y - min_y < 0) e_angle += 180;
+					if (obj[n_object].y - min_y < 0 && obj[n_object].x - min_x > 0) e_angle += 180;
+					obj[n_object].angle -= 57.3*5*sin((e_angle - obj[0].bullet_angle[i]) / 57.3) / dl_k;
 
-					obj[n_object].hp -= 200;
+					obj[n_object].hp -= 200; //вычитаем здоровье
 
-					//obj[n_object].x -= 5*sin(obj[0].bullet_angle[i] / 57.3);
-					//obj[n_object].y -= 5*cos(obj[0].bullet_angle[i] / 57.3);
-					obj[0].bullet_shot &= ~(1 << i);
+					obj[0].bullet_shot &= ~(1 << i); //деактивируем пулю
 				}
 				obj[0].bullet_x[i] = min_x;
 				obj[0].bullet_y[i] = min_y;
-				obj[0].bullet[i].setPosition(obj[0].bullet_x[i], obj[0].bullet_y[i]);
+				obj[0].bullet[i].setPosition(obj[0].bullet_x[i], obj[0].bullet_y[i]); //двигаем пулю на новое место
 			}
 			else
 			{
 				obj[0].bullet_x[i] = -30;
 				obj[0].bullet_y[i] = -30;
-				obj[0].bullet[i].setPosition(-30, -30);
+				obj[0].bullet[i].setPosition(-30, -30); //если пуля неактивна то передвигаем ее за границу экрана
 			}
-			if (obj[0].bullet_x[i] > width + 30 || obj[0].bullet_x[i] < -30 || obj[0].bullet_y[i] < -30 || obj[0].bullet_y[i] > height + 30)
+			if (obj[0].bullet_x[i] > width + 30 || obj[0].bullet_x[i] < -30 || obj[0].bullet_y[i] < -30 || obj[0].bullet_y[i] > height + 30) //проверка на выход за границу поля
 			{
-				obj[0].bullet_shot &= ~(1 << i);
+				obj[0].bullet_shot &= ~(1 << i); //деактивируем пулю
+			}
+		}
+
+		for (int i = 0; i < 10; i++) //обработка пуль второго объекта
+		{
+			if ((obj[1].bullet_shot >> i) % 2) //если пуля летит
+			{
+				obj[1].bullet[i].setPosition(obj[1].bullet_x[i], obj[1].bullet_y[i]); //задаем позицию спрайта
+				obj[1].bullet[i].setRotation(-obj[1].bullet_angle[i]);
+				double min_x = obj[1].bullet_x[i] - bullet_v * sin(obj[1].bullet_angle[i] / 57.3); //позиция точки куда пуля прилетит
+				double min_y = obj[1].bullet_y[i] - bullet_v * cos(obj[1].bullet_angle[i] / 57.3);
+				int n_object = -1; // номер обекта в который попали
+				int s_object = -1; //сторона объекта в который попали
+				for (int k = 0; k < obj_n; k++) //перебираем другие объекты
+				{
+					if (k != 1 && sq(obj[1].bullet_x[i] - obj[k].x) + sq(obj[1].bullet_y[i] - obj[k].y) < sq(bullet_v + obj[k].max_dist + 10)) //если они достаточно близко
+					{
+						for (int n = 0; n < obj[k].n; n++) //перебираем стороны объекта
+						{
+							pt a, b, c, d;
+							a.x = obj[1].bullet_x[i] - bullet_v * sin(obj[1].bullet_angle[i] / 57.3);
+							a.y = obj[1].bullet_y[i] - bullet_v * cos(obj[1].bullet_angle[i] / 57.3);
+							//circle1.setPosition(a.x, a.y);
+							b.x = obj[1].bullet_x[i];
+							b.y = obj[1].bullet_y[i];
+							c.x = obj[k].x + obj[k].c[n].l * sin((obj[k].angle + obj[k].c[n].a) / 57.3);
+							c.y = obj[k].y + obj[k].c[n].l * cos((obj[k].angle + obj[k].c[n].a) / 57.3);
+							if (n < obj[k].n - 1)
+							{
+								d.x = obj[k].x + obj[k].c[n + 1].l * sin((obj[k].angle + obj[k].c[n + 1].a) / 57.3);
+								d.y = obj[k].y + obj[k].c[n + 1].l * cos((obj[k].angle + obj[k].c[n + 1].a) / 57.3);
+							}
+							else
+							{
+								d.x = obj[k].x + obj[k].c[1].l * sin((obj[k].angle + obj[k].c[1].a) / 57.3);
+								d.y = obj[k].y + obj[k].c[1].l * cos((obj[k].angle + obj[k].c[1].a) / 57.3);
+							}
+							if (intersect(a, b, c, d)) // проверяем пересечение траектории пули с стороной объекта
+							{
+								double k1 = (a.y - b.y) / (a.x - b.x);
+								double p1 = a.y - k1 * a.x;
+
+								double k2 = (c.y - d.y) / (c.x - d.x);
+								double p2 = c.y - k2 * c.x;
+
+								double x0 = (p1 - p2) / (k2 - k1); //вычисляем точку пересечения
+								double y0 = k1 * x0 + p1;
+								//circle.setPosition(x0, y0);
+								if (sq(b.x - x0) + sq(b.y - y0) < sq(b.x - min_x) + sq(b.y - min_y)) //если она ближе к текущему положению пули
+								{
+									min_x = x0; //записываем точку пересечения с объектом
+									min_y = y0;
+									n_object = k; //номер объекта
+									s_object = n; //и его сторону
+								}
+							}
+						}
+					}
+				}
+				min_x += 3 * sin(obj[1].bullet_angle[i] / 57.3); //немного сдвигаем пулю назад
+				min_y += 3 * cos(obj[1].bullet_angle[i] / 57.3);
+				if (n_object != -1) //если пересечение с объектом было
+				{
+					double d_angle = obj[n_object].angle + obj[n_object].s[s_object].a - 90; //вычисляем отталкивание объекта
+					obj[n_object].x -= 5 * sin(obj[1].bullet_angle[i] / 57.3);
+					obj[n_object].y -= 5 * cos(obj[1].bullet_angle[i] / 57.3);
+					double dl_k = sqrt(sq(min_x - obj[n_object].x) + sq(min_y - obj[n_object].y));
+					double e_angle = 57.3*atan(-(min_x - obj[n_object].x) / (obj[n_object].y - min_y));
+					obj[n_object].angle += 57.3 * 5 * sin((e_angle - d_angle) / 57.3) / dl_k;
+
+					obj[n_object].hp -= 200; //вычитаем здоровье
+
+					obj[1].bullet_shot &= ~(1 << i); //деактивируем пулю
+				}
+				obj[1].bullet_x[i] = min_x;
+				obj[1].bullet_y[i] = min_y;
+				obj[1].bullet[i].setPosition(obj[1].bullet_x[i], obj[1].bullet_y[i]); //двигаем пулю на новое место
+			}
+			else
+			{
+				obj[1].bullet_x[i] = -30;
+				obj[1].bullet_y[i] = -30;
+				obj[1].bullet[i].setPosition(-30, -30); //если пуля неактивна то передвигаем ее за границу экрана
+			}
+			if (obj[1].bullet_x[i] > width + 30 || obj[1].bullet_x[i] < -30 || obj[1].bullet_y[i] < -30 || obj[1].bullet_y[i] > height + 30) //проверка на выход за границу поля
+			{
+				obj[1].bullet_shot &= ~(1 << i); //деактивируем пулю
 			}
 		}
 		//window.draw(circle);
@@ -797,6 +916,15 @@ int main()
 		{
 			window.draw(obj[0].bullet[i]); //отрисовка пуль
 		}*/
+
+		for (int i = 0; i < 10; i++)
+		{
+			window.draw(obj[0].bullet[i]); //отрисовка пуль
+		}
+		for (int i = 0; i < 10; i++)
+		{
+			window.draw(obj[1].bullet[i]); //отрисовка пуль
+		}
 		window.draw(energy1_bar); //отрисовка полоски энергии
 		window.draw(energy1);
 		window.draw(hp1_bar); //отрисовка полоски жизней
@@ -808,11 +936,6 @@ int main()
 		window.draw(hp2);
 		//window.draw(convex);
 		//window.draw(convex1);
-		/*if (shot)
-		{
-			window.draw(bull1);
-			shot++;
-		}*/
 		window.display(); //вывод на экран
 		Sleep(1); //ждем 1 мс
 	}
