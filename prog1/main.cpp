@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include "windows.h"
 #include "Math.h"
+#include "time.h"
 
 #define KEY_DOWN(key) (GetAsyncKeyState(key) & 0x8000) //обработка нажатий клавиш
 #define KEY_PUSH(key) (GetAsyncKeyState(key) & 0x0001)
@@ -8,8 +9,10 @@
 #define v_max 3 //скорость марсохода
 #define angle_max 2 //угловая скорость марсохода
 #define bullet_v 30 //скорость пуль марсохода
+#define bullet_o 10 //отбрасывание от пули
+#define bullet_a 5 //отдача от выстрела
 
-#define obj_n 3 //количество объектов 
+#define obj_n 23 //количество объектов 
 
 #define width 1900 //размеры окна
 #define height 1000
@@ -97,6 +100,7 @@ object obj[obj_n]; //создание объектов
 
 int main()
 {
+	srand(time(NULL) % 32765);
 	RenderWindow window(VideoMode(width, height), "prog1"); //создаем окно
 
 	Texture background; //открываем картинку бэкграунда
@@ -120,6 +124,9 @@ int main()
 	hp1_bar.setSize(Vector2f(200, 20));
 	hp1_bar.setPosition(20, 50);
 	hp1_bar.setFillColor(Color(0, 0, 0, 128));
+
+	Texture texture0;
+	texture0.loadFromFile("..\\rover_destroyed1.png");
 
 	Texture texture1; //текстура первого марсохода
 	texture1.loadFromFile("..\\rover_new1.png");
@@ -288,6 +295,9 @@ int main()
 	obj[2].s[3].a = 0;
 	obj[2].s[3].l = 21;
 
+	Texture texture4;
+	texture4.loadFromFile("..\\wall1.png");
+
 	/*Texture texture4;
 	texture4.loadFromFile("C:\\С++\\infa_project\\prog1\\base1.png");
 	obj[3].sprite.setTexture(texture4);
@@ -374,6 +384,69 @@ int main()
 			n++;
 		}
 	}*/
+
+	for (int n = 3; n < obj_n; n++)
+	{
+		int object_type = 1 + 2 * rand() / RAND_MAX; //тип объекта 1 - ящик, 2 - стена
+		//int object_type = 2;
+		if (object_type == 1)
+		{
+			obj[n].sprite.setTexture(texture3);
+			obj[n].sprite.setOrigin(11, 11);
+			obj[n].x = 200 + (width - 400) * rand() / RAND_MAX;
+			obj[n].y = 100 + (height - 200) * rand() / RAND_MAX;
+			obj[n].angle = 360 * rand() / RAND_MAX;
+			obj[n].mass = 0.5;
+			obj[n].n = 4;
+			obj[n].c[0].a = -45;
+			obj[n].c[0].l = 15.55;
+			obj[n].c[1].a = 45;
+			obj[n].c[1].l = 15.55;
+			obj[n].c[2].a = 135;
+			obj[n].c[2].l = 15.55;
+			obj[n].c[3].a = -135;
+			obj[n].c[3].l = 15.55;
+			obj[n].max_dist = 15.55;
+
+			obj[n].s[0].a = 90;
+			obj[n].s[0].l = 21;
+			obj[n].s[1].a = 180;
+			obj[n].s[1].l = 21;
+			obj[n].s[2].a = -90;
+			obj[n].s[2].l = 21;
+			obj[n].s[3].a = 0;
+			obj[n].s[3].l = 21;
+		}
+		else if (object_type == 2)
+		{
+			obj[n].sprite.setTexture(texture4);
+			obj[n].sprite.setOrigin(16, 48);
+			obj[n].x = 200 + (width - 400) * rand() / RAND_MAX;
+			obj[n].y = 100 + (height - 200) * rand() / RAND_MAX;
+			obj[n].angle = 360 * rand() / RAND_MAX;
+			obj[n].mass = 2.5;
+			obj[n].n = 4;
+			obj[n].c[0].a = -7.71;
+			obj[n].c[0].l = 48.44;
+			obj[n].c[1].a = 7.71;
+			obj[n].c[1].l = 48.44;
+			obj[n].c[2].a = 172.29;
+			obj[n].c[2].l = 48.44;
+			obj[n].c[3].a = -172.29;
+			obj[n].c[3].l = 48.44;
+			obj[n].max_dist = 48.44;
+
+			obj[n].s[0].a = 90;
+			obj[n].s[0].l = 21;
+			obj[n].s[1].a = 180;
+			obj[n].s[1].l = 21;
+			obj[n].s[2].a = -90;
+			obj[n].s[2].l = 21;
+			obj[n].s[3].a = 0;
+			obj[n].s[3].l = 21;
+		}
+	}
+
 	//Sprite sprite(texture);
 	//sprite.setOrigin(25, 40);
 	//sprite.setPosition(400, 300);
@@ -419,29 +492,29 @@ int main()
 		}
 		if(KEY_PUSH(VK_ESCAPE)) window.close();
 		
-		if (KEY_DOWN(VK_LCONTROL)) obj[0].energy -= 4; //включение режима ускорения
-		if (KEY_DOWN(0x57)) //обработка нажатий клавиш движения
+		if (KEY_DOWN(VK_LCONTROL) && obj[0].hp > 0) obj[0].energy -= 4; //включение режима ускорения
+		if (KEY_DOWN(0x57) && obj[0].hp > 0) //обработка нажатий клавиш движения
 		{
 			if (!KEY_DOWN(VK_LCONTROL) || obj[0].energy < 0) obj[0].v = -v_max;
 			else obj[0].v = -v_max * 1.5;
 		}
-		if (KEY_DOWN(0x53))
+		if (KEY_DOWN(0x53) && obj[0].hp > 0)
 		{
 			if (!KEY_DOWN(VK_LCONTROL) || obj[0].energy < 0) obj[0].v = v_max;
 			else obj[0].v = v_max * 1.5;
 		}
-		if (KEY_DOWN(0x41))
+		if (KEY_DOWN(0x41) && obj[0].hp > 0)
 		{
 			if (!KEY_DOWN(VK_LCONTROL) || obj[0].energy < 0) obj[0].angle += angle_max;
 			else obj[0].angle += angle_max * 1.5;
 		}
-		if (KEY_DOWN(0x44))
+		if (KEY_DOWN(0x44) && obj[0].hp > 0)
 		{
 			if (!KEY_DOWN(VK_LCONTROL) || obj[0].energy < 0) obj[0].angle -= angle_max;
 			else obj[0].angle -= angle_max * 1.5;
 		}
 
-		if (KEY_DOWN(VK_LSHIFT) && shot0_press == 0) //обработка выстрела 
+		if (KEY_DOWN(VK_LSHIFT) && shot0_press == 0 && obj[0].hp > 0) //обработка выстрела 
 		{
 			if (obj[0].reg == 1 && obj[0].energy > 300) //проверка режима и энергии | одиночный режим
 			{
@@ -456,8 +529,8 @@ int main()
 				obj[0].bullet_y[i] = obj[0].y - 15 * cos(obj[0].angle / 57.3);
 				obj[0].energy -= 300;
 
-				obj[0].x -= 5 * sin(-obj[0].angle / 57.3); //отдача
-				obj[0].y += 5 * cos(-obj[0].angle / 57.3);
+				obj[0].x -= bullet_a * sin(-obj[0].angle / 57.3); //отдача
+				obj[0].y += bullet_a * cos(-obj[0].angle / 57.3);
 			}
 			if (obj[0].reg == 2 && obj[0].energy > 500) //проверка режима и энергии | режим тройного выстрела
 			{
@@ -490,8 +563,8 @@ int main()
 				obj[0].bullet_y[i] = obj[0].y - 15 * cos(obj[0].angle / 57.3);
 				obj[0].energy -= 500;
 
-				obj[0].x -= 8 * sin(-obj[0].angle / 57.3); //отдача
-				obj[0].y += 8 * cos(-obj[0].angle / 57.3);
+				obj[0].x -= 1.6 * bullet_a * sin(-obj[0].angle / 57.3); //отдача
+				obj[0].y += 1.6 * bullet_a * cos(-obj[0].angle / 57.3);
 			}
 			shot0_press = 1;
 		}
@@ -512,29 +585,29 @@ int main()
 		constrain(obj[1].hp, 0, 1000);
 
 
-		if (KEY_DOWN(VK_RCONTROL)) obj[1].energy -= 4; //включение режима ускорения
-		if (KEY_DOWN(VK_DOWN)) //отработка нажатий клавиш
+		if (KEY_DOWN(VK_RCONTROL) && obj[1].hp > 0) obj[1].energy -= 4; //включение режима ускорения
+		if (KEY_DOWN(VK_DOWN) && obj[1].hp > 0) //отработка нажатий клавиш
 		{
 			if (!KEY_DOWN(VK_RCONTROL) || obj[1].energy < 0) obj[1].v = -v_max;
 			else obj[1].v = -v_max * 1.5;
 		}
-		if (KEY_DOWN(VK_UP))
+		if (KEY_DOWN(VK_UP) && obj[1].hp > 0)
 		{
 			if (!KEY_DOWN(VK_RCONTROL) || obj[1].energy < 0) obj[1].v = v_max;
 			else obj[1].v = v_max * 1.5;
 		}
-		if (KEY_DOWN(VK_LEFT))
+		if (KEY_DOWN(VK_LEFT) && obj[1].hp > 0)
 		{
 			if (!KEY_DOWN(VK_RCONTROL) || obj[1].energy < 0) obj[1].angle += angle_max;
 			else obj[1].angle += angle_max * 1.5;
 		}
-		if (KEY_DOWN(VK_RIGHT))
+		if (KEY_DOWN(VK_RIGHT) && obj[1].hp > 0)
 		{
 			if (!KEY_DOWN(VK_RCONTROL) || obj[1].energy < 0) obj[1].angle -= angle_max;
 			else obj[1].angle -= angle_max * 1.5;
 		}
 
-		if (KEY_DOWN(VK_RSHIFT) && shot1_press == 0) //обработка выстрела 
+		if (KEY_DOWN(VK_RSHIFT) && shot1_press == 0 && obj[1].hp > 0) //обработка выстрела 
 		{
 			if (obj[1].reg == 1 && obj[1].energy > 300) //проверка режима и энергии | одиночный режим
 			{
@@ -549,8 +622,8 @@ int main()
 				obj[1].bullet_y[i] = obj[1].y - 15 * cos(obj[1].angle / 57.3);
 				obj[1].energy -= 300;
 
-				obj[1].x -= 5 * sin(-obj[1].angle / 57.3); //отдача
-				obj[1].y += 5 * cos(-obj[1].angle / 57.3);
+				obj[1].x -= bullet_a * sin(-obj[1].angle / 57.3); //отдача
+				obj[1].y += bullet_a * cos(-obj[1].angle / 57.3);
 			}
 			if (obj[1].reg == 2 && obj[1].energy > 500) //проверка режима и энергии | режим тройного выстрела
 			{
@@ -583,8 +656,8 @@ int main()
 				obj[1].bullet_y[i] = obj[1].y - 15 * cos(obj[1].angle / 57.3);
 				obj[1].energy -= 500;
 
-				obj[1].x -= 8 * sin(-obj[1].angle / 57.3); //отдача
-				obj[1].y += 8 * cos(-obj[1].angle / 57.3);
+				obj[1].x -= 1.6 * bullet_a * sin(-obj[1].angle / 57.3); //отдача
+				obj[1].y += 1.6 * bullet_a * cos(-obj[1].angle / 57.3);
 			}
 			shot1_press = 1;
 		}
@@ -776,15 +849,23 @@ int main()
 				if (n_object != -1) //если пересечение с объектом было
 				{
 					double d_angle = obj[n_object].angle + obj[n_object].s[s_object].a - 90; //вычисляем отталкивание объекта
-					obj[n_object].x -= 5 * sin(obj[0].bullet_angle[i] / 57.3);
-					obj[n_object].y -= 5 * cos(obj[0].bullet_angle[i] / 57.3);
+					obj[n_object].x -= bullet_o * sin(obj[0].bullet_angle[i] / 57.3) / obj[n_object].mass;
+					obj[n_object].y -= bullet_o * cos(obj[0].bullet_angle[i] / 57.3) / obj[n_object].mass;
 					double dl_k = sqrt(sq(min_x - obj[n_object].x) + sq(min_y - obj[n_object].y));
 					double e_angle = 57.3*atan((obj[n_object].x - min_x) / (obj[n_object].y - min_y));
 					if (obj[n_object].x - min_x < 0 && obj[n_object].y - min_y < 0) e_angle += 180;
 					if (obj[n_object].y - min_y < 0 && obj[n_object].x - min_x > 0) e_angle += 180;
-					obj[n_object].angle -= 57.3*5*sin((e_angle - obj[0].bullet_angle[i]) / 57.3) / dl_k;
+					obj[n_object].angle -= 57.3*bullet_o*sin((e_angle - obj[0].bullet_angle[i]) / 57.3) / dl_k / obj[n_object].mass;
 
-					obj[n_object].hp -= 200; //вычитаем здоровье
+					if (obj[n_object].hp != 0)
+					{
+						obj[n_object].hp -= 200; //вычитаем здоровье
+						if (obj[n_object].hp <= 0) //если здоровье упало ниже нуля
+						{
+							obj[n_object].hp = 0;
+							obj[n_object].sprite.setTexture(texture0); //то заменяем текстуру на уничтоженный объект
+						}
+					}
 
 					obj[0].bullet_shot &= ~(1 << i); //деактивируем пулю
 				}
@@ -865,14 +946,24 @@ int main()
 				if (n_object != -1) //если пересечение с объектом было
 				{
 					double d_angle = obj[n_object].angle + obj[n_object].s[s_object].a - 90; //вычисляем отталкивание объекта
-					obj[n_object].x -= 5 * sin(obj[1].bullet_angle[i] / 57.3);
-					obj[n_object].y -= 5 * cos(obj[1].bullet_angle[i] / 57.3);
+					obj[n_object].x -= bullet_o * sin(obj[1].bullet_angle[i] / 57.3) / obj[n_object].mass;
+					obj[n_object].y -= bullet_o * cos(obj[1].bullet_angle[i] / 57.3) / obj[n_object].mass;
 					double dl_k = sqrt(sq(min_x - obj[n_object].x) + sq(min_y - obj[n_object].y));
-					double e_angle = 57.3*atan(-(min_x - obj[n_object].x) / (obj[n_object].y - min_y));
-					obj[n_object].angle += 57.3 * 5 * sin((e_angle - d_angle) / 57.3) / dl_k;
+					double e_angle = 57.3*atan((obj[n_object].x - min_x) / (obj[n_object].y - min_y));
+					if (obj[n_object].x - min_x < 0 && obj[n_object].y - min_y < 0) e_angle += 180;
+					if (obj[n_object].y - min_y < 0 && obj[n_object].x - min_x > 0) e_angle += 180;
+					obj[n_object].angle -= 57.3 * bullet_o * sin((e_angle - obj[1].bullet_angle[i]) / 57.3) / dl_k / obj[n_object].mass;
 
-					obj[n_object].hp -= 200; //вычитаем здоровье
-
+					if (obj[n_object].hp != 0)
+					{
+						obj[n_object].hp -= 200; //вычитаем здоровье
+						if (obj[n_object].hp <= 0)
+						{
+							obj[n_object].hp = 0;
+							obj[n_object].sprite.setTexture(texture0);
+						}
+					}
+				
 					obj[1].bullet_shot &= ~(1 << i); //деактивируем пулю
 				}
 				obj[1].bullet_x[i] = min_x;
