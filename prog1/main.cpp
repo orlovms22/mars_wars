@@ -12,7 +12,7 @@
 #define bullet_o 10 //отбрасывание от пули
 #define bullet_a 5 //отдача от выстрела
 
-#define obj_n 23 //количество объектов 
+#define obj_n 50 //количество объектов 
 
 #define width 1900 //размеры окна
 #define height 1000
@@ -187,7 +187,7 @@ int main()
 		obj[0].bullet[i].setOrigin(3, 7);
 	}
 	obj[0].bullet_shot = 0; //биты состояния пуль 1 - летит / 0 - ожидание
-	obj[0].reg = 1; //режим стрельбы первого марсохода
+	obj[0].reg = 3; //режим стрельбы первого марсохода
 	bool shot0_press = false; //предыдущее состояние кнопки выстрела
 
 	RectangleShape energy2; //создаем полоску энергии второго марсохода
@@ -264,7 +264,7 @@ int main()
 		obj[1].bullet[i].setOrigin(3, 7);
 	}
 	obj[1].bullet_shot = 0; //биты состояния пуль 1 - летит / 0 - ожидание
-	obj[1].reg = 1; //режим стрельбы второго марсохода
+	obj[1].reg = 3; //режим стрельбы второго марсохода
 	bool shot1_press = false; //предыдущее состояние кнопки выстрела
 
 	Texture texture3;
@@ -297,6 +297,9 @@ int main()
 
 	Texture texture4;
 	texture4.loadFromFile("..\\wall1.png");
+
+	/*Texture texture5;
+	texture5.loadFromFile("..\\wall_corner1.png");*/
 
 	/*Texture texture4;
 	texture4.loadFromFile("C:\\С++\\infa_project\\prog1\\base1.png");
@@ -387,14 +390,14 @@ int main()
 
 	for (int n = 3; n < obj_n; n++)
 	{
-		int object_type = 1 + 2 * rand() / RAND_MAX; //тип объекта 1 - ящик, 2 - стена
+		int object_type = 1 + 4 * rand() / RAND_MAX; //тип объекта 1 - ящик, 2 - стена, 3 - структура: три ящика и две стены, 4 - структура: две стены углом
 		//int object_type = 2;
 		if (object_type == 1)
 		{
 			obj[n].sprite.setTexture(texture3);
 			obj[n].sprite.setOrigin(11, 11);
-			obj[n].x = 200 + (width - 400) * rand() / RAND_MAX;
-			obj[n].y = 100 + (height - 200) * rand() / RAND_MAX;
+			obj[n].x = 100 + (width - 200) * rand() / RAND_MAX;
+			obj[n].y = 50 + (height - 100) * rand() / RAND_MAX;
 			obj[n].angle = 360 * rand() / RAND_MAX;
 			obj[n].mass = 0.5;
 			obj[n].n = 4;
@@ -421,8 +424,8 @@ int main()
 		{
 			obj[n].sprite.setTexture(texture4);
 			obj[n].sprite.setOrigin(16, 48);
-			obj[n].x = 200 + (width - 400) * rand() / RAND_MAX;
-			obj[n].y = 100 + (height - 200) * rand() / RAND_MAX;
+			obj[n].x = 100 + (width - 200) * rand() / RAND_MAX;
+			obj[n].y = 50 + (height - 100) * rand() / RAND_MAX;
 			obj[n].angle = 360 * rand() / RAND_MAX;
 			obj[n].mass = 2.5;
 			obj[n].n = 4;
@@ -444,6 +447,226 @@ int main()
 			obj[n].s[2].l = 21;
 			obj[n].s[3].a = 0;
 			obj[n].s[3].l = 21;
+		}
+		else if (object_type == 3)
+		{
+			int ver = 10 * rand() / RAND_MAX;
+			if (obj_n - n >= 5 && ver > 7)
+			{
+				double x_obj = 100 + (width - 200) * rand() / RAND_MAX;
+				double y_obj = 50 + (height - 100) * rand() / RAND_MAX;
+				double angle_obj = 360 * rand() / RAND_MAX;
+
+				obj[n].sprite.setTexture(texture4);
+				obj[n].sprite.setOrigin(16, 48);
+				obj[n].x = x_obj;
+				obj[n].y = y_obj;
+				obj[n].angle = angle_obj;
+				obj[n].mass = 2.5;
+				obj[n].n = 4;
+				obj[n].c[0].a = -7.71;
+				obj[n].c[0].l = 48.44;
+				obj[n].c[1].a = 7.71;
+				obj[n].c[1].l = 48.44;
+				obj[n].c[2].a = 172.29;
+				obj[n].c[2].l = 48.44;
+				obj[n].c[3].a = -172.29;
+				obj[n].c[3].l = 48.44;
+				obj[n].max_dist = 48.44;
+
+				obj[n].s[0].a = 90;
+				obj[n].s[0].l = 21;
+				obj[n].s[1].a = 180;
+				obj[n].s[1].l = 21;
+				obj[n].s[2].a = -90;
+				obj[n].s[2].l = 21;
+				obj[n].s[3].a = 0;
+				obj[n].s[3].l = 21;
+
+				n++;
+
+				obj[n].sprite.setTexture(texture4);
+				obj[n].sprite.setOrigin(16, 48);
+				obj[n].x = x_obj - 98 * sin(angle_obj / 57.3);
+				obj[n].y = y_obj - 98 * cos(angle_obj / 57.3);
+				obj[n].angle = angle_obj;
+				obj[n].mass = 2.5;
+				obj[n].n = 4;
+				obj[n].c[0].a = -7.71;
+				obj[n].c[0].l = 48.44;
+				obj[n].c[1].a = 7.71;
+				obj[n].c[1].l = 48.44;
+				obj[n].c[2].a = 172.29;
+				obj[n].c[2].l = 48.44;
+				obj[n].c[3].a = -172.29;
+				obj[n].c[3].l = 48.44;
+				obj[n].max_dist = 48.44;
+
+				obj[n].s[0].a = 90;
+				obj[n].s[0].l = 21;
+				obj[n].s[1].a = 180;
+				obj[n].s[1].l = 21;
+				obj[n].s[2].a = -90;
+				obj[n].s[2].l = 21;
+				obj[n].s[3].a = 0;
+				obj[n].s[3].l = 21;
+
+				n++;
+
+				obj[n].sprite.setTexture(texture3);
+				obj[n].sprite.setOrigin(11, 11);
+				obj[n].x = x_obj - 22.67 * sin((angle_obj + 48.58) / 57.3);
+				obj[n].y = y_obj - 22.67 * cos((angle_obj + 48.58) / 57.3);
+				obj[n].angle = angle_obj;
+				obj[n].mass = 0.5;
+				obj[n].n = 4;
+				obj[n].c[0].a = -45;
+				obj[n].c[0].l = 15.55;
+				obj[n].c[1].a = 45;
+				obj[n].c[1].l = 15.55;
+				obj[n].c[2].a = 135;
+				obj[n].c[2].l = 15.55;
+				obj[n].c[3].a = -135;
+				obj[n].c[3].l = 15.55;
+				obj[n].max_dist = 15.55;
+
+				obj[n].s[0].a = 90;
+				obj[n].s[0].l = 21;
+				obj[n].s[1].a = 180;
+				obj[n].s[1].l = 21;
+				obj[n].s[2].a = -90;
+				obj[n].s[2].l = 21;
+				obj[n].s[3].a = 0;
+				obj[n].s[3].l = 21;
+
+				n++;
+
+				obj[n].sprite.setTexture(texture3);
+				obj[n].sprite.setOrigin(11, 11);
+				obj[n].x = x_obj - 41.63 * sin((angle_obj + 24.1) / 57.3);
+				obj[n].y = y_obj - 41.63 * cos((angle_obj + 24.1) / 57.3);
+				obj[n].angle = angle_obj;
+				obj[n].mass = 0.5;
+				obj[n].n = 4;
+				obj[n].c[0].a = -45;
+				obj[n].c[0].l = 15.55;
+				obj[n].c[1].a = 45;
+				obj[n].c[1].l = 15.55;
+				obj[n].c[2].a = 135;
+				obj[n].c[2].l = 15.55;
+				obj[n].c[3].a = -135;
+				obj[n].c[3].l = 15.55;
+				obj[n].max_dist = 15.55;
+
+				obj[n].s[0].a = 90;
+				obj[n].s[0].l = 21;
+				obj[n].s[1].a = 180;
+				obj[n].s[1].l = 21;
+				obj[n].s[2].a = -90;
+				obj[n].s[2].l = 21;
+				obj[n].s[3].a = 0;
+				obj[n].s[3].l = 21;
+
+				n++;
+
+				obj[n].sprite.setTexture(texture3);
+				obj[n].sprite.setOrigin(11, 11);
+				obj[n].x = x_obj - 48.26 * sin((angle_obj + 55.98) / 57.3);
+				obj[n].y = y_obj - 48.26 * cos((angle_obj + 55.98) / 57.3);
+				obj[n].angle = angle_obj;
+				obj[n].mass = 0.5;
+				obj[n].n = 4;
+				obj[n].c[0].a = -45;
+				obj[n].c[0].l = 15.55;
+				obj[n].c[1].a = 45;
+				obj[n].c[1].l = 15.55;
+				obj[n].c[2].a = 135;
+				obj[n].c[2].l = 15.55;
+				obj[n].c[3].a = -135;
+				obj[n].c[3].l = 15.55;
+				obj[n].max_dist = 15.55;
+
+				obj[n].s[0].a = 90;
+				obj[n].s[0].l = 21;
+				obj[n].s[1].a = 180;
+				obj[n].s[1].l = 21;
+				obj[n].s[2].a = -90;
+				obj[n].s[2].l = 21;
+				obj[n].s[3].a = 0;
+				obj[n].s[3].l = 21;
+			}
+			else
+			{
+				n--;
+			}
+		}
+		else if (object_type == 4)
+		{
+			int ver = 10 * rand() / RAND_MAX;
+			if (obj_n - n >= 2 && ver > 5)
+			{
+				double x_obj = 100 + (width - 200) * rand() / RAND_MAX;
+				double y_obj = 50 + (height - 100) * rand() / RAND_MAX;
+				double angle_obj = 360 * rand() / RAND_MAX;
+
+				obj[n].sprite.setTexture(texture4);
+				obj[n].sprite.setOrigin(16, 48);
+				obj[n].x = x_obj;
+				obj[n].y = y_obj;
+				obj[n].angle = angle_obj;
+				obj[n].mass = 2.5;
+				obj[n].n = 4;
+				obj[n].c[0].a = -7.71;
+				obj[n].c[0].l = 48.44;
+				obj[n].c[1].a = 7.71;
+				obj[n].c[1].l = 48.44;
+				obj[n].c[2].a = 172.29;
+				obj[n].c[2].l = 48.44;
+				obj[n].c[3].a = -172.29;
+				obj[n].c[3].l = 48.44;
+				obj[n].max_dist = 48.44;
+
+				obj[n].s[0].a = 90;
+				obj[n].s[0].l = 21;
+				obj[n].s[1].a = 180;
+				obj[n].s[1].l = 21;
+				obj[n].s[2].a = -90;
+				obj[n].s[2].l = 21;
+				obj[n].s[3].a = 0;
+				obj[n].s[3].l = 21;
+
+				n++;
+
+				obj[n].sprite.setTexture(texture4);
+				obj[n].sprite.setOrigin(16, 48);
+				obj[n].x = x_obj - 71 * sin((angle_obj + 45) / 57.3);
+				obj[n].y = y_obj - 71 * cos((angle_obj + 45) / 57.3);
+				obj[n].angle = angle_obj + 90;
+				obj[n].mass = 2.5;
+				obj[n].n = 4;
+				obj[n].c[0].a = -7.71;
+				obj[n].c[0].l = 48.44;
+				obj[n].c[1].a = 7.71;
+				obj[n].c[1].l = 48.44;
+				obj[n].c[2].a = 172.29;
+				obj[n].c[2].l = 48.44;
+				obj[n].c[3].a = -172.29;
+				obj[n].c[3].l = 48.44;
+				obj[n].max_dist = 48.44;
+
+				obj[n].s[0].a = 90;
+				obj[n].s[0].l = 21;
+				obj[n].s[1].a = 180;
+				obj[n].s[1].l = 21;
+				obj[n].s[2].a = -90;
+				obj[n].s[2].l = 21;
+				obj[n].s[3].a = 0;
+				obj[n].s[3].l = 21;
+			}
+			else
+			{
+				n--;
+			}
 		}
 	}
 
@@ -481,8 +704,34 @@ int main()
 
 	while (window.isOpen())
 	{
-		//if (shot) bull1.move(bullet_v*sin(angle_b / 57.3), -bullet_v * cos(angle_b / 57.3));
-		//if (shot > 80) shot = 0;
+
+		if (KEY_PUSH(VK_SPACE))
+		{
+			Texture pause;
+			pause.loadFromFile("..\\pause1.png");
+			Sprite pause_sprite;
+			pause_sprite.setTexture(pause);
+			pause_sprite.setScale(2, 2);
+			pause_sprite.setPosition(width / 2 - 242, height / 2 - 86);
+			window.draw(pause_sprite);
+			window.display();
+			while (1)
+			{
+				bool exit_flag = false;
+				Event event; //обработка закрытия окна
+				while (window.pollEvent(event))
+				{
+					if (event.type == Event::Closed)
+					{
+						window.close();
+						exit_flag = true;
+					}
+				}
+				if (KEY_PUSH(VK_ESCAPE)) window.close();
+				if (KEY_PUSH(VK_SPACE)) exit_flag = true;
+				if (exit_flag) break;
+			}
+		}
 
 		Event event; //обработка закрытия окна
 		while (window.pollEvent(event))
@@ -565,6 +814,31 @@ int main()
 
 				obj[0].x -= 1.6 * bullet_a * sin(-obj[0].angle / 57.3); //отдача
 				obj[0].y += 1.6 * bullet_a * cos(-obj[0].angle / 57.3);
+			}
+			if (obj[0].reg == 3 && obj[0].energy > 400) //проверка режима и энергии | режим двойного выстрела
+			{
+				int i = 0;
+				while ((obj[0].bullet_shot >> i) % 2) //поиск свободной пули
+				{
+					i++;
+				}
+				obj[0].bullet_shot |= 1 << i; //устанавливаем бит полета пули
+				obj[0].bullet_angle[i] = obj[0].angle + 8 * rand() / RAND_MAX; //задаем направление и положение
+				obj[0].bullet_x[i] = obj[0].x - 15 * sin(obj[0].angle / 57.3) - 8 * sin((obj[0].angle + 90) / 57.3);
+				obj[0].bullet_y[i] = obj[0].y - 15 * cos(obj[0].angle / 57.3) - 8 * cos((obj[0].angle + 90) / 57.3);
+				i = 0;
+				while ((obj[0].bullet_shot >> i) % 2) //поиск свободной пули
+				{
+					i++;
+				}
+				obj[0].bullet_shot |= 1 << i; //устанавливаем бит полета пули
+				obj[0].bullet_angle[i] = obj[0].angle - 8 * rand() / RAND_MAX;;//задаем направление и положение
+				obj[0].bullet_x[i] = obj[0].x - 15 * sin(obj[0].angle / 57.3) - 8 * sin((obj[0].angle - 90) / 57.3);
+				obj[0].bullet_y[i] = obj[0].y - 15 * cos(obj[0].angle / 57.3) - 8 * cos((obj[0].angle - 90) / 57.3);
+				obj[0].energy -= 400;
+
+				obj[0].x -= 1.8 * bullet_a * sin(-obj[0].angle / 57.3); //отдача
+				obj[0].y += 1.8 * bullet_a * cos(-obj[0].angle / 57.3);
 			}
 			shot0_press = 1;
 		}
@@ -658,6 +932,31 @@ int main()
 
 				obj[1].x -= 1.6 * bullet_a * sin(-obj[1].angle / 57.3); //отдача
 				obj[1].y += 1.6 * bullet_a * cos(-obj[1].angle / 57.3);
+			}
+			if (obj[1].reg == 3 && obj[0].energy > 400) //проверка режима и энергии | режим двойного выстрела
+			{
+				int i = 0;
+				while ((obj[1].bullet_shot >> i) % 2) //поиск свободной пули
+				{
+					i++;
+				}
+				obj[1].bullet_shot |= 1 << i; //устанавливаем бит полета пули
+				obj[1].bullet_angle[i] = obj[1].angle + 8 * rand() / RAND_MAX; //задаем направление и положение
+				obj[1].bullet_x[i] = obj[1].x - 15 * sin(obj[1].angle / 57.3) - 8 * sin((obj[1].angle + 90) / 57.3);
+				obj[1].bullet_y[i] = obj[1].y - 15 * cos(obj[1].angle / 57.3) - 8 * cos((obj[1].angle + 90) / 57.3);
+				i = 0;
+				while ((obj[1].bullet_shot >> i) % 2) //поиск свободной пули
+				{
+					i++;
+				}
+				obj[1].bullet_shot |= 1 << i; //устанавливаем бит полета пули
+				obj[1].bullet_angle[i] = obj[1].angle - 8 * rand() / RAND_MAX;;//задаем направление и положение
+				obj[1].bullet_x[i] = obj[1].x - 15 * sin(obj[1].angle / 57.3) - 8 * sin((obj[1].angle - 90) / 57.3);
+				obj[1].bullet_y[i] = obj[1].y - 15 * cos(obj[1].angle / 57.3) - 8 * cos((obj[1].angle - 90) / 57.3);
+				obj[1].energy -= 400;
+
+				obj[1].x -= 1.8 * bullet_a * sin(-obj[1].angle / 57.3); //отдача
+				obj[1].y += 1.8 * bullet_a * cos(-obj[1].angle / 57.3);
 			}
 			shot1_press = 1;
 		}
