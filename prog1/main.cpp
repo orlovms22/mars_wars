@@ -14,7 +14,7 @@
 
 #define obj_n 50 //количество объектов
 #define bonus_n 5 //максимальное количество бонусов
-#define bonus_range 200 //минимальная дистанция от бонуса до марсохода 
+#define bonus_range 400 //минимальная дистанция от бонуса до марсохода 
 
 #define width 1900 //размеры окна
 #define height 950
@@ -102,11 +102,39 @@ object obj[obj_n + bonus_n]; //создание объектов
 
 int main()
 {
-	srand(time(NULL) % 32765);
-	RenderWindow window(VideoMode(width, height), "prog1"); //создаем окно
-
 	Texture background; //открываем картинку бэкграунда
 	background.loadFromFile("..\\background.png");
+
+	Texture texture0;
+	texture0.loadFromFile("..\\rover_destroyed1.png");
+
+	Texture texture1; //текстура первого марсохода
+	texture1.loadFromFile("..\\rover_new1.png");
+
+	Texture texture2;
+	texture2.loadFromFile("..\\rover_new2.png");
+
+	Texture texture_bullet; //текстура пуль первого марсохода
+	texture_bullet.loadFromFile("..\\bull.png");
+
+	Texture texture3;
+	texture3.loadFromFile("..\\box.png");
+
+	Texture texture4;
+	texture4.loadFromFile("..\\wall1.png");
+
+	Texture texture_health;
+	texture_health.loadFromFile("..\\box_health.png");
+
+	Texture texture_triple;
+	texture_triple.loadFromFile("..\\box_triple.png");
+
+	Texture texture_double;
+	texture_double.loadFromFile("..\\box_double.png");
+
+	srand(time(NULL) % 32765);
+	RenderWindow window(VideoMode(width, height), "mars_wars"); //создаем окно
+
 	Sprite bg(background);
 
 	RectangleShape energy1; //создаем полоску энергии первого марсохода
@@ -132,11 +160,6 @@ int main()
 		obj[i].enable = true;
 	}
 
-	Texture texture0;
-	texture0.loadFromFile("..\\rover_destroyed1.png");
-
-	Texture texture1; //текстура первого марсохода
-	texture1.loadFromFile("..\\rover_new1.png");
 	obj[0].sprite.setTexture(texture1);
 	obj[0].sprite.setOrigin(25, 40);
 
@@ -185,8 +208,6 @@ int main()
 	obj[0].s[7].a = 0;
 	obj[0].s[7].l = 62;
 
-	Texture texture_bullet; //текстура пуль первого марсохода
-	texture_bullet.loadFromFile("..\\bull.png");
 	for (int i = 0; i < 10; i++)
 	{
 		obj[0].bullet[i].setTexture(texture_bullet);
@@ -215,8 +236,6 @@ int main()
 	hp2_bar.setPosition(width - 220, 50);
 	hp2_bar.setFillColor(Color(0, 0, 0, 128));
 
-	Texture texture2;
-	texture2.loadFromFile("..\\rover_new2.png");
 	obj[1].sprite.setTexture(texture2);
 	obj[1].sprite.setOrigin(25, 40);
 	obj[1].x = 800;
@@ -275,8 +294,6 @@ int main()
 	obj[1].enable = true;
 	bool shot1_press = false; //предыдущее состояние кнопки выстрела
 
-	Texture texture3;
-	texture3.loadFromFile("..\\box.png");
 	obj[2].sprite.setTexture(texture3);
 	obj[2].sprite.setOrigin(11, 11);
 	obj[2].x = 600;
@@ -302,18 +319,6 @@ int main()
 	obj[2].s[2].l = 21;
 	obj[2].s[3].a = 0;
 	obj[2].s[3].l = 21;
-
-	Texture texture4;
-	texture4.loadFromFile("..\\wall1.png");
-
-	Texture texture_health;
-	texture_health.loadFromFile("..\\box_health.png");
-
-	Texture texture_triple;
-	texture_triple.loadFromFile("..\\box_triple.png");
-
-	Texture texture_double;
-	texture_double.loadFromFile("..\\box_double.png");
 
 	/*Texture texture5;
 	texture5.loadFromFile("..\\wall_corner1.png");*/
@@ -824,7 +829,7 @@ int main()
 			if (event.type == Event::Closed)
 				window.close();
 		}
-		if(KEY_PUSH(VK_ESCAPE)) window.close();
+		if (KEY_PUSH(VK_ESCAPE)) window.close();
 
 		int bonus_count = 0;
 		for (int i = obj_n; i < obj_n + bonus_n; i++)
